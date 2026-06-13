@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "start": "serve -s dist -p ${PORT:-3000}",
+    "start": "serve -s web -p ${PORT:-3000}",
     "test:e2e": "vitest run tests/e2e --environment jsdom",
     "test:ai": "tsx test-gamemaster.ts"
   },
