@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "echo \"Skipping Vite build, serving pre-built Godot web folder\"",
+    "build": "curl -L -o web/index.pck https://media.githubusercontent.com/media/antomgarre/fabled-kingdoms/main/web/index.pck && curl -L -o web/index.wasm https://media.githubusercontent.com/media/antomgarre/fabled-kingdoms/main/web/index.wasm",
     "preview": "vite preview",
     "start": "serve -s web -p ${PORT:-3000}",
     "test:e2e": "vitest run tests/e2e --environment jsdom",
