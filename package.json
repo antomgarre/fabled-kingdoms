@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "echo \"Skipping Vite build, serving pre-built Godot web folder\"",
     "preview": "vite preview",
     "start": "serve -s web -p ${PORT:-3000}",
     "test:e2e": "vitest run tests/e2e --environment jsdom",

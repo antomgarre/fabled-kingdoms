@@ -12,10 +12,6 @@ config_version=5
 
 compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 
-[autoload]
-
-AIManager="*res://scripts/AIManager.gd"
-
 [application]
 
 config/name="Fabled Kingdoms"
@@ -23,6 +19,10 @@ config/description="A medieval fantasy RPG built with Godot 4."
 run/main_scene="res://scenes/Main.tscn"
 config/features=PackedStringArray("4.6", "Forward Plus")
 config/icon="res://icon.svg"
+
+[autoload]
+
+AIManager="*res://scripts/AIManager.gd"
 
 [display]
 

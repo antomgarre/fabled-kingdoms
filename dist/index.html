@@ -6,18 +6,29 @@
   <title>Fabled Kingdoms</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-  <script type="module" crossorigin src="/assets/index-B7in1bHP.js"></script>
+  <script type="module" crossorigin src="/assets/index-CSoM6HqU.js"></script>
   <link rel="stylesheet" crossorigin href="/assets/index-DRyI-xYC.css">
 </head>
 <body>
   <div id="error-log" style="position: absolute; top: 0; left: 0; z-index: 9999; color: red; background: rgba(255,255,255,0.9); padding: 10px; font-family: monospace; pointer-events: none;"></div>
   <script>
+    const errorLog = document.getElementById('error-log');
     window.addEventListener('error', function(e) {
-      document.getElementById('error-log').innerText += 'Error: ' + e.message + '\n' + (e.error ? e.error.stack : '') + '\n';
+      errorLog.innerText += 'Error: ' + e.message + '\n';
     });
     window.addEventListener('unhandledrejection', function(e) {
-      document.getElementById('error-log').innerText += 'Promise Rejection: ' + e.reason + '\n';
+      errorLog.innerText += 'Promise: ' + e.reason + '\n';
     });
+    const oldLog = console.log;
+    console.log = function(...args) {
+      errorLog.innerText += args.join(' ') + '\n';
+      oldLog.apply(console, args);
+    };
+    const oldErr = console.error;
+    console.error = function(...args) {
+      errorLog.innerText += 'ERR: ' + args.join(' ') + '\n';
+      oldErr.apply(console, args);
+    };
   </script>
   <div id="app"></div>
 </body>
