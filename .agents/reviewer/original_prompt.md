@@ -1,0 +1,3 @@
+## 2026-06-11T14:43:17Z
+**Context**: We are reviewing Tier 2 boundary/corner E2E tests for Skeletal Animations in `tests/e2e/tier2/animations.test.ts`.
+**Task**: Review `tests/e2e/tier2/animations.test.ts` for correctness, completeness, and robustness. Run the tests using `npx vitest run tests/e2e/tier2/animations.test.ts` to verify they compile and execute. Determine if they cover the scope: missing animations, invalid state transitions, rapid state changes, empty state. Ensure there are exactly or more than 5 test cases. Provide a Reviewer verdict (Pass/Fail) with your findings in a handoff.md report.

@@ -1,0 +1,79 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/Player.tscn" id="1_player"]
+[ext_resource type="Script" path="res://scripts/WorldBuilder.gd" id="2_world"]
+[ext_resource type="Script" path="res://scripts/TerrainGenerator.gd" id="3_terrain"]
+[ext_resource type="PackedScene" path="res://scenes/HUD.tscn" id="4_hud"]
+[ext_resource type="Shader" path="res://assets/shaders/water.gdshader" id="5_water_shader"]
+
+[sub_resource type="PhysicalSkyMaterial" id="PhysicalSkyMaterial_sky"]
+rayleigh_color = Color(0.18, 0.32, 0.54, 1)
+mie_color = Color(0.85, 0.9, 0.95, 1)
+
+[sub_resource type="Sky" id="Sky_main"]
+sky_material = SubResource("PhysicalSkyMaterial_sky")
+
+[sub_resource type="Environment" id="Environment_env"]
+background_mode = 2
+sky = SubResource("Sky_main")
+ambient_light_source = 3
+ambient_light_color = Color(0.5, 0.6, 0.7, 1)
+tonemap_mode = 2
+glow_enabled = true
+ssao_enabled = true
+sdfgi_enabled = true
+sdfgi_use_occlusion = true
+volumetric_fog_enabled = true
+volumetric_fog_density = 0.02
+volumetric_fog_albedo = Color(0.8, 0.85, 0.9, 1)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_water"]
+render_priority = 0
+shader = ExtResource("5_water_shader")
+shader_parameter/shallow_color = Color(0.1, 0.45, 0.55, 0.7)
+shader_parameter/deep_color = Color(0.02, 0.12, 0.3, 0.9)
+shader_parameter/depth_distance = 8.0
+shader_parameter/wave_speed = 0.4
+shader_parameter/wave_strength = 0.15
+shader_parameter/wave_frequency = 4.0
+shader_parameter/wave_frequency2 = 2.5
+shader_parameter/normal_strength = 0.8
+shader_parameter/specular_power = 48.0
+shader_parameter/roughness_val = 0.05
+shader_parameter/metallic_val = 0.3
+shader_parameter/fresnel_power = 4.0
+shader_parameter/fresnel_color = Color(0.3, 0.7, 0.85, 1.0)
+shader_parameter/foam_distance = 1.2
+shader_parameter/foam_color = Color(0.9, 0.95, 1.0, 0.8)
+shader_parameter/caustic_speed = 0.3
+shader_parameter/caustic_scale = 8.0
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_water"]
+size = Vector2(500, 500)
+subdivide_width = 128
+subdivide_depth = 128
+
+[node name="Main" type="Node3D"]
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866025, -0.25, 0.433013, 0, 0.866025, 0.5, -0.5, -0.433013, 0.75, 0, 10, 0)
+shadow_enabled = true
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_env")
+
+[node name="TerrainGenerator" type="Node3D" parent="."]
+script = ExtResource("3_terrain")
+
+[node name="WaterPlane" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.6, 0)
+mesh = SubResource("PlaneMesh_water")
+surface_material_override/0 = SubResource("ShaderMaterial_water")
+
+[node name="Player" parent="." instance=ExtResource("1_player")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5, 0)
+
+[node name="WorldBuilder" type="Node3D" parent="."]
+script = ExtResource("2_world")
+
+[node name="HUD" parent="." instance=ExtResource("4_hud")]

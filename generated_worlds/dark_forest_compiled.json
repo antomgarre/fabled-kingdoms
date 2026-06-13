@@ -1,0 +1,287 @@
+{
+    "region_id": "thornhaven",
+    "region_name": "Thornhaven",
+    "biome": "temperate_forest_edge",
+    "level_range": [
+        1,
+        5
+    ],
+    "npcs": [
+        {
+            "id": "npc_maren",
+            "name": "Maren Ashfield",
+            "role": "NPC_MERCHANT",
+            "backstory": "Posadera directa que busca mantener su negocio a flote.",
+            "stats": {
+                "health": 300,
+                "speed": 1.5,
+                "aggressiveness": 0
+            },
+            "visuals": {
+                "base_body": "AnimatedVillager",
+                "outfit": "AnimatedVillager"
+            },
+            "position": {
+                "x": 25,
+                "y": 10,
+                "z": -25
+            },
+            "dialogue_opening": "Bienvenido al Ciervo Torcido. ¿Qué necesitas?"
+        },
+        {
+            "id": "npc_aldric",
+            "name": "Aldric Moln",
+            "role": "NPC_FRIENDLY",
+            "backstory": "Molinero pensativo preocupado por el nivel del río.",
+            "stats": {
+                "health": 250,
+                "speed": 1.8,
+                "aggressiveness": 0
+            },
+            "visuals": {
+                "base_body": "AnimatedKnight",
+                "outfit": "AnimatedKnight"
+            },
+            "position": {
+                "x": 30,
+                "y": 10,
+                "z": -23
+            },
+            "dialogue_opening": "El río lleva poca agua últimamente..."
+        },
+        {
+            "id": "npc_vael",
+            "name": "Sacerdotisa Vael Dorne",
+            "role": "NPC_FRIENDLY",
+            "backstory": "Sylvari que escucha la Corriente de la Tierra.",
+            "stats": {
+                "health": 400,
+                "speed": 2,
+                "aggressiveness": 0
+            },
+            "visuals": {
+                "base_body": "AnimatedEnemy",
+                "outfit": "AnimatedEnemy"
+            },
+            "position": {
+                "x": 23,
+                "y": 10,
+                "z": -30
+            },
+            "dialogue_opening": "La tierra recuerda. ¿Sabes escuchar?"
+        },
+        {
+            "id": "npc_bandit_1",
+            "name": "Bandido Animado",
+            "role": "ENEMY",
+            "backstory": "Le gusta bailar en su tiempo libre.",
+            "stats": {
+                "health": 100,
+                "speed": 4,
+                "aggressiveness": 0.85
+            },
+            "visuals": {
+                "base_body": "ladron_unido",
+                "outfit": "ladron_unido",
+                "animation_library": "res://assets/animations/EnemyAnimationLibrary.res",
+                "texture": "res://assets/models/ladron_unido_Color_5db537b7-96b5-441d-a5ac-d1be5831c58c.jpg",
+                "idle_animations": [
+                    "Idle",
+                    "Ninja_Idle",
+                    "Rumba_Dancing",
+                    "mutant breathing idle",
+                    "mutant flexing muscles",
+                    "mutant idle (2)",
+                    "mutant left turn 45",
+                    "mutant right turn 45"
+                ]
+            },
+            "position": {
+                "x": 40,
+                "y": 10,
+                "z": -35
+            },
+            "dialogue_opening": "¡Llevo el ritmo en la sangre!"
+        }
+    ],
+    "environment_props": [
+        {
+            "id": "prop_stall_1",
+            "type": "Stall_Empty",
+            "position": {
+                "x": 27,
+                "y": 10,
+                "z": -24
+            },
+            "rotation": {
+                "y": 1.57
+            }
+        },
+        {
+            "id": "prop_barrel_1",
+            "type": "Barrel",
+            "position": {
+                "x": 28,
+                "y": 10,
+                "z": -24
+            },
+            "rotation": {
+                "y": 0
+            }
+        },
+        {
+            "id": "prop_barrel_2",
+            "type": "Barrel",
+            "position": {
+                "x": 28.5,
+                "y": 10,
+                "z": -23.5
+            },
+            "rotation": {
+                "y": 0.5
+            }
+        },
+        {
+            "id": "prop_bench_1",
+            "type": "Bench",
+            "position": {
+                "x": 22,
+                "y": 10,
+                "z": -22
+            },
+            "rotation": {
+                "y": -0.5
+            }
+        },
+        {
+            "id": "prop_crate_1",
+            "type": "Crate_Wooden",
+            "position": {
+                "x": 24,
+                "y": 10,
+                "z": -28
+            },
+            "rotation": {
+                "y": 0.2
+            }
+        },
+        {
+            "id": "tree_pine_1",
+            "type": "Pine_1",
+            "position": {
+                "x": 17,
+                "y": 10,
+                "z": -33
+            },
+            "rotation": {
+                "y": 0.5
+            }
+        },
+        {
+            "id": "tree_pine_2",
+            "type": "Pine_2",
+            "position": {
+                "x": 33,
+                "y": 10,
+                "z": -37
+            },
+            "rotation": {
+                "y": 1.2
+            }
+        },
+        {
+            "id": "tree_common_1",
+            "type": "CommonTree_1",
+            "position": {
+                "x": 35,
+                "y": 10,
+                "z": -25
+            },
+            "rotation": {
+                "y": 2.1
+            }
+        },
+        {
+            "id": "tree_common_2",
+            "type": "CommonTree_2",
+            "position": {
+                "x": 20,
+                "y": 10,
+                "z": -20
+            },
+            "rotation": {
+                "y": 0.8
+            }
+        },
+        {
+            "id": "rock_1",
+            "type": "Rock_Medium_1",
+            "position": {
+                "x": 21,
+                "y": 10,
+                "z": -31
+            },
+            "rotation": {
+                "y": 1
+            }
+        },
+        {
+            "id": "rock_2",
+            "type": "Rock_Medium_2",
+            "position": {
+                "x": 32,
+                "y": 10,
+                "z": -21
+            },
+            "rotation": {
+                "y": 2.5
+            }
+        },
+        {
+            "id": "rock_path",
+            "type": "RockPath_Round_Wide",
+            "position": {
+                "x": 26,
+                "y": 10,
+                "z": -26
+            },
+            "rotation": {
+                "y": 0
+            }
+        }
+    ],
+    "enemies": [
+        {
+            "id": "goblin_1",
+            "type": "AnimatedEnemy",
+            "position": {
+                "x": 45,
+                "y": 10,
+                "z": -40
+            },
+            "stats": {
+                "hp": 50,
+                "damage": 10
+            }
+        },
+        {
+            "id": "goblin_2",
+            "type": "AnimatedKnight",
+            "position": {
+                "x": 50,
+                "y": 10,
+                "z": -45
+            },
+            "stats": {
+                "hp": 50,
+                "damage": 10
+            }
+        }
+    ],
+    "terrain": {
+        "seed": 12345,
+        "noise_scale": 0.005,
+        "height_multiplier": 3,
+        "water_level": -1
+    }
+}

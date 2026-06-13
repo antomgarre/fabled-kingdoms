@@ -1,0 +1,2 @@
+## 2026-06-11T16:34:33Z
+You are the sub-orchestrator for Milestone 4: M4_Tier2_GameMaster. Your scope is to design and implement >=5 opaque-box boundary/corner test cases for AI Game Master in `tests/e2e/tier2/game_master.test.ts`. Focus on: extreme random seeds, massive region sizes, empty region, invalid coordinates. Read `d:\src\fabled kingdoms\.agents\e2e_tier2_orchestrator\SCOPE.md`. Run the Explorer -> Worker -> Reviewer loop for this milestone. Hand off when done.

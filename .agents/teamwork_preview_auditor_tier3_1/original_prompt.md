@@ -1,0 +1,2 @@
+## 2026-06-11T14:43:04Z
+You are the Forensic Auditor for the Tier 3 E2E Tests. Verify that the work products implement the functionality authentically without cheating. Check if the test assertions are circumventing the actual checks. Provide your full evidence report in `handoff.md` and explicitly state your verdict: CLEAN or INTEGRITY VIOLATION. Your working directory is `d:\src\fabled kingdoms\.agents\teamwork_preview_auditor_tier3_1`. Send a completion message when done.

@@ -1,0 +1,209 @@
+import type { IRegionBlueprint } from './types';
+
+/**
+ * Mock Region Blueprint — "The Velanthi Reach"
+ *
+ * A hand-crafted blueprint demonstrating the full Region Blueprint system.
+ * This serves as both a development mock (no AI API call needed) and
+ * a reference for the kind of output the AI Content Engine should produce.
+ *
+ * The Velanthi Reach is a lush river valley where ancient fae magic still
+ * lingers in the mist. Rolling green hills are bisected by the shimmering
+ * River Velan, and the ruins of a long-fallen civilization peek through
+ * the wildflowers.
+ */
+export const MOCK_BLUEPRINT: IRegionBlueprint = {
+  regionId: 'velanthi_reach',
+  name: 'The Velanthi Reach',
+  description:
+    'A sweeping expanse of emerald hills and silver-threaded streams, where the River Velan carves a gentle path through meadows of moonpetal and sungrass. The air carries the faint chime of wind-bells left by the Velan, an ancient fae people whose luminous towers once crowned every hilltop. Now only one tower remains standing — the Spire of Echoes — its pale stone catching the light like a lighthouse for the lost.',
+
+  terrain: {
+    type: 'rolling_hills',
+    baseElevation: 'low',
+    features: [
+      {
+        type: 'river',
+        name: 'River Velan',
+        path: 'northwest_to_southeast',
+        description:
+          'A wide, slow river of crystalline water that glows faintly blue at dusk. The Velan people believed it carried memories downstream, and those who drink from it sometimes dream of the ancient world.',
+      },
+      {
+        type: 'hill',
+        name: 'Thornwatch Hill',
+        position: 'northeast',
+        height: 'medium',
+        description:
+          'A prominent hill crowned by a ring of ancient standing stones, each one carved with spiraling glyphs that seem to shift when viewed from the corner of the eye.',
+      },
+      {
+        type: 'clearing',
+        name: 'The Whispering Circle',
+        position: 'center',
+        size: 'medium',
+        description:
+          'A perfectly circular clearing in the tall grass where no wind blows. Locals say that promises spoken here are heard by the old gods.',
+      },
+      {
+        type: 'lake',
+        name: 'Mirrorfen Pool',
+        position: 'southwest',
+        size: 'small',
+        description:
+          'A still, dark pool fed by underground springs. Its surface is so calm it reflects the sky with uncanny perfection — some claim it shows not the present sky, but the sky of yesterday.',
+      },
+    ],
+    vegetationStyle: 'temperate_meadow',
+    vegetationDensity: 'medium',
+    dominantTrees: ['silver_birch', 'willow', 'rowan'],
+    groundCover: ['moonpetal', 'sungrass', 'wild_thyme', 'clover'],
+  },
+
+  locations: [
+    {
+      type: 'village',
+      name: 'Greyhaven',
+      position: 'center_west',
+      size: 'small',
+      description:
+        'A quiet hamlet of stone cottages with moss-covered roofs, built along the western bank of the River Velan. Smoke curls from chimneys scented with rosemary and cedar. The villagers are a mix of humans and halflings who live by fishing, herding, and trading with the occasional caravan.',
+      population: 'humans_and_halflings',
+      atmosphere: 'warm, rustic, and welcoming',
+      buildings: [
+        { type: 'tavern', name: 'The Driftwood Hearth' },
+        { type: 'shop', name: "Brenna's Botanicals" },
+        { type: 'elder_house', name: 'Hearthstone Hall' },
+        { type: 'blacksmith', name: "Torval's Forge" },
+      ],
+    },
+    {
+      type: 'ruins',
+      name: 'The Spire of Echoes',
+      position: 'northeast_edge',
+      size: 'medium',
+      description:
+        'The last standing tower of the Velan civilization — a slender needle of pale opalescent stone that rises impossibly high above the hills. Its interior is a maze of spiraling stairs and empty chambers where ghostly whispers echo endlessly. At night, a cold blue light pulses from its summit.',
+      dangerLevel: 6,
+      lootQuality: 'rare',
+      atmosphere: 'haunted, melancholic, awe-inspiring',
+    },
+    {
+      type: 'landmark',
+      name: 'The Singing Stones of Thornwatch',
+      position: 'northeast',
+      description:
+        'A ring of seven weathered menhirs atop Thornwatch Hill. When the wind passes between them, they produce a low, resonant hum that locals call "the old song." Scholars believe these stones once served as a fae calendar, aligning with celestial events.',
+    },
+    {
+      type: 'shrine',
+      name: 'Wellspring of the Unnamed',
+      position: 'south',
+      size: 'small',
+      description:
+        'A moss-covered stone basin fed by an ever-flowing spring. Offerings of wildflowers and silver coins line its rim. Travelers leave prayers here to a deity whose name has been forgotten, but whose blessing still seems to protect the valley.',
+      atmosphere: 'sacred, serene, ancient',
+    },
+  ],
+
+  npcs: [
+    {
+      name: 'Maren Ashwick',
+      role: 'quest_giver',
+      race: 'human',
+      location: 'Hearthstone Hall',
+      personality: 'stoic, perceptive, burdened by duty',
+      greeting:
+        "Another soul drawn to the Reach. I won't ask why — everyone who comes here is searching for something they can't name. Sit. Eat. And when you're ready, perhaps we can help each other.",
+      backstory:
+        'The elected elder of Greyhaven, Maren served as a knight in a distant kingdom before a wound ended her martial career. She came to the Reach seeking peace, but the growing disturbances from the Spire of Echoes threaten the village she now protects.',
+    },
+    {
+      name: 'Pip Thistledown',
+      role: 'merchant',
+      race: 'halfling',
+      location: "Brenna's Botanicals",
+      personality: 'cheerful, gossipy, secretly shrewd',
+      greeting:
+        "Oh wonderful, a new face! You look like someone who appreciates fine herbs. Or maybe potions? I've got a lovely draft that makes your dreams taste like strawberries. Don't ask how — trade secret!",
+      backstory:
+        "Pip inherited the shop from his aunt Brenna, who disappeared into the hills three years ago chasing a rumor about moonpetal nectar. He keeps the shop running in her memory, though he's more interested in stories than in botany.",
+    },
+    {
+      name: 'Torval Ironbend',
+      role: 'craftsman',
+      race: 'dwarf',
+      location: "Torval's Forge",
+      personality: 'gruff, honorable, quietly generous',
+      greeting:
+        "Need steel? I make it strong. Need talk? Go to the tavern. ...Still here? Fine. What do you want forged? And don't say a magic sword — I'm a smith, not a wizard.",
+      backstory:
+        'Torval left the dwarven holds after a disagreement with his clan over mining rights that would have destroyed an ancient grove. He settled in Greyhaven, where the humans and halflings accepted him without question. He forges practical tools and weapons, and secretly leaves repaired farming implements at the doors of families who cannot afford his work.',
+    },
+    {
+      name: 'Sylthara',
+      role: 'wanderer',
+      race: 'elf',
+      location: 'The Spire of Echoes',
+      personality: 'enigmatic, melancholic, deeply knowledgeable',
+      greeting:
+        'You hear them too, then? The voices in the stone. I have been trying to decipher their song for... how long has it been? The days blur here. Be careful — the Spire remembers those who enter, and it does not always let them leave unchanged.',
+      backstory:
+        'An elven scholar who arrived at the Reach decades ago to study the Velan ruins. She has spent so long within the Spire that she has begun to merge with its memories, speaking of ancient events as if she witnessed them personally. The villagers are unsure whether she is a reliable guide or a cautionary tale.',
+    },
+  ],
+
+  quests: [
+    {
+      name: 'The Song Between Stones',
+      type: 'mystery',
+      giver: 'Maren Ashwick',
+      description:
+        'The Singing Stones of Thornwatch have fallen silent for the first time in living memory. Maren fears this is connected to the strange lights emanating from the Spire of Echoes. Investigate the standing stones and discover why the old song has stopped.',
+      difficulty: 'medium',
+      rewards: ['enchanted_runestone', 'reputation_greyhaven', 'lore_velan_calendar'],
+    },
+    {
+      name: "Brenna's Last Trail",
+      type: 'exploration',
+      giver: 'Pip Thistledown',
+      description:
+        "Pip's aunt Brenna left behind a journal with cryptic notes about a grove of moonpetals that bloom only under a new moon. Her last entry mentions the Mirrorfen Pool. Follow her trail and discover what happened to her.",
+      difficulty: 'easy',
+      rewards: ['moonpetal_extract', 'brenna_recipe_book', 'reputation_greyhaven'],
+    },
+    {
+      name: 'Echoes of the Velan',
+      type: 'exploration',
+      giver: 'Sylthara',
+      description:
+        'Sylthara believes a chamber deep within the Spire of Echoes contains a Velan memory crystal — a record of the events that led to their civilization\'s fall. She needs someone with "unwritten memories" to retrieve it, as the Spire\'s guardians attack anyone it recognizes.',
+      difficulty: 'hard',
+      rewards: ['velan_memory_crystal', 'spire_fragment_armor', 'lore_velan_fall'],
+    },
+  ],
+
+  ambient: {
+    timeOfDayPreference: 'late_afternoon_golden',
+    weather: 'gentle_breeze_with_high_clouds',
+    sounds: ['birdsong', 'flowing_river', 'wind_through_grass', 'distant_windchimes'],
+    musicMood: 'pastoral_with_undertone_of_mystery',
+    particleEffects: ['floating_dandelion_seeds', 'fireflies_at_dusk', 'faint_mist_over_river'],
+  },
+
+  pvpRules: {
+    type: 'safe_zone',
+    description:
+      'The Velanthi Reach is protected by an ancient ward woven into the standing stones. Acts of violence cause the aggressor to be wracked with disorienting visions until they cease. The villagers of Greyhaven tolerate much, but will exile persistent troublemakers.',
+  },
+
+  lore:
+    "The Velanthi Reach takes its name from the Velan — a fae people who built their civilization here long before the age of men. They were scholars and dreamweavers, capable of storing memories in crystal and weaving starlight into stone. Their towers dotted the hills like pale candles, and the River Velan — named after them — was said to flow with distilled moonlight.\n\nThe Velan vanished in a single night during an event known only as the Unraveling. No battle was fought; no army marched. The towers simply went dark, and when dawn came, the Velan were gone. Only the Spire of Echoes remained lit, its cold blue flame a beacon that has burned for over a thousand years.\n\nGreyhaven was founded three centuries ago by settlers who were drawn to the valley's uncanny fertility and mild weather. They built their village respectfully, never disturbing the ruins, and over generations developed a quiet reverence for the vanished Velan. The standing stones of Thornwatch still hum with fae power, and the Wellspring of the Unnamed — a shrine to a forgotten deity — continues to flow.\n\nRecently, the Spire's light has grown brighter, and strange sounds carry across the hills at night. The Singing Stones have fallen silent. Something is stirring in the Reach — whether it is a remnant of Velan magic awakening or something else entirely, no one can say.",
+
+  connections: {
+    north: 'The Wraithwood — a dense, lightless forest where few venture',
+    south: 'The Sun Road, leading to the trade city of Kaelmont',
+    east: 'The Shattered Highlands — wind-blasted plateaus and ancient battlefields',
+    west: 'The Coral Coast — fishing villages and storm-battered cliffs',
+  },
+};

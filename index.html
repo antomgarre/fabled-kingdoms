@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fabled Kingdoms</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div id="error-log" style="position: absolute; top: 0; left: 0; z-index: 9999; color: red; background: rgba(255,255,255,0.9); padding: 10px; font-family: monospace; pointer-events: none;"></div>
+  <script>
+    const errorLog = document.getElementById('error-log');
+    window.addEventListener('error', function(e) {
+      errorLog.innerText += 'Error: ' + e.message + '\n';
+    });
+    window.addEventListener('unhandledrejection', function(e) {
+      errorLog.innerText += 'Promise: ' + e.reason + '\n';
+    });
+    const oldLog = console.log;
+    console.log = function(...args) {
+      errorLog.innerText += args.join(' ') + '\n';
+      oldLog.apply(console, args);
+    };
+    const oldErr = console.error;
+    console.error = function(...args) {
+      errorLog.innerText += 'ERR: ' + args.join(' ') + '\n';
+      oldErr.apply(console, args);
+    };
+  </script>
+  <div id="app"></div>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
