@@ -1,0 +1,5 @@
+[phases.setup]
+nixPkgs = ["...", "git", "git-lfs"]
+
+[phases.install]
+cmds = ["git lfs pull", "npm ci"]

@@ -5,9 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "curl -L -o web/index.pck https://media.githubusercontent.com/media/antomgarre/fabled-kingdoms/main/web/index.pck && curl -L -o web/index.wasm https://media.githubusercontent.com/media/antomgarre/fabled-kingdoms/main/web/index.wasm",
+    "build": "echo 'No build step needed for Godot web export'",
     "preview": "vite preview",
-    "start": "serve -s web -p ${PORT:-3000}",
+    "start": "serve web -p ${PORT:-3000}",
     "test:e2e": "vitest run tests/e2e --environment jsdom",
     "test:ai": "tsx test-gamemaster.ts"
   },
