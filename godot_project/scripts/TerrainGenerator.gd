@@ -3,7 +3,7 @@ class_name TerrainGenerator
 
 var noise = FastNoiseLite.new()
 const CHUNK_SIZE = 300
-const RESOLUTION = 2.0 # Vertices per unit
+const RESOLUTION = 0.5 # Lower resolution for WebGL 16-bit limits
 
 var mesh_instance: MeshInstance3D
 var static_body: StaticBody3D
@@ -98,21 +98,50 @@ func _create_mesh():
 	st.generate_normals()
 	mesh_instance.mesh = st.commit()
 	
-	# Create green grass material with noise texture
-	var mat = StandardMaterial3D.new()
-	var noise_tex = NoiseTexture2D.new()
-	var n = FastNoiseLite.new()
-	n.seed = 999
-	n.frequency = 0.5
-	n.fractal_type = FastNoiseLite.FRACTAL_FBM
-	n.fractal_octaves = 4
-	noise_tex.noise = n
-	noise_tex.color_ramp = Gradient.new()
-	noise_tex.color_ramp.add_point(0.0, Color(0.2, 0.4, 0.15))
-	noise_tex.color_ramp.add_point(1.0, Color(0.3, 0.5, 0.2))
+	# Create procedural grass shader material
+	var shader = Shader.new()
+	shader.code = """
+shader_type spatial;
+render_mode blend_mix, depth_draw_opaque, cull_back, diffuse_burley, specular_schlick_ggx;
+
+varying vec3 world_pos;
+
+void vertex() {
+	world_pos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+}
+
+// Simple procedural noise
+float hash(vec2 p) {
+	return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453);
+}
+float noise(vec2 p) {
+	vec2 i = floor(p);
+	vec2 f = fract(p);
+	vec2 u = f * f * (3.0 - 2.0 * f);
+	return mix(mix(hash(i + vec2(0.0,0.0)), hash(i + vec2(1.0,0.0)), u.x),
+			   mix(hash(i + vec2(0.0,1.0)), hash(i + vec2(1.0,1.0)), u.x), u.y);
+}
+
+void fragment() {
+	float n1 = noise(world_pos.xz * 2.0);
+	float n2 = noise(world_pos.xz * 10.0);
 	
-	mat.albedo_texture = noise_tex
-	mat.roughness = 0.9
+	vec3 color1 = vec3(0.18, 0.38, 0.13); // Darker green
+	vec3 color2 = vec3(0.25, 0.45, 0.18); // Lighter green
+	vec3 dirt_color = vec3(0.35, 0.28, 0.2); // Dirt
+	
+	vec3 albedo = mix(color1, color2, n1 * 0.7 + n2 * 0.3);
+	
+	// Add dirt on slopes
+	float slope = 1.0 - NORMAL.y;
+	albedo = mix(albedo, dirt_color, smoothstep(0.15, 0.4, slope));
+	
+	ALBEDO = albedo;
+	ROUGHNESS = 0.9;
+}
+"""
+	var mat = ShaderMaterial.new()
+	mat.shader = shader
 	mesh_instance.material_override = mat
 	
 	# Create Collision
