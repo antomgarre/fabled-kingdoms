@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "echo 'No build step needed for Godot web export'",
+    "build": "node download-lfs.js",
     "preview": "vite preview",
     "start": "serve web -p ${PORT:-3000}",
     "test:e2e": "vitest run tests/e2e --environment jsdom",
