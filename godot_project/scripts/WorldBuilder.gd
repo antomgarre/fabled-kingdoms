@@ -1,7 +1,5 @@
 extends Node3D
 
-var npc_scene = preload("res://scenes/NPC.tscn")
-
 func _ready():
 	# In a full game, the region name would depend on where the player is.
 	AIManager.request_npc_generation("Dark Forest", _on_region_loaded)

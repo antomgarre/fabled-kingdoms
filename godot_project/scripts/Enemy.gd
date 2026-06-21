@@ -26,7 +26,7 @@ var health_bar_container: SubViewport
 var attack_dealt = false
 
 func take_damage(amount: float):
-	if hp <= 0: return
+	if is_dead: return
 	hp -= amount
 	
 	if hit_sound:
@@ -54,6 +54,7 @@ func take_damage(amount: float):
 		_play_anim("HitRecieve")
 
 func _die():
+	is_dead = true
 	current_state = State.HURT
 	_play_anim("Death")
 	
@@ -63,6 +64,9 @@ func _die():
 			child.visible = false
 	
 	$CollisionShape3D.set_deferred("disabled", true)
+	
+	if death_sound and not death_sound.playing:
+		death_sound.play()
 	
 	await get_tree().create_timer(2.0).timeout
 	var tween = create_tween()
@@ -129,17 +133,8 @@ func initialize(data: Dictionary):
 						anim.loop_mode = Animation.LOOP_LINEAR
 
 func _physics_process(delta):
-	if hp <= 0:
-		if not is_dead:
-			is_dead = true
-			_play_anim("Death")
-			if death_sound and not death_sound.playing:
-				death_sound.play()
-			
-			# Disable collisions so player can walk through
-			$CollisionShape3D.disabled = true
-			
-		return # Stop physics processing logic if dead
+	if is_dead:
+		return
 		
 	if not is_on_floor():
 		velocity.y -= gravity * delta

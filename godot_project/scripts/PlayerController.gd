@@ -4,7 +4,7 @@ extends CharacterBody3D
 const WALK_SPEED = 4.0
 const SPRINT_SPEED = 7.0
 const JUMP_VELOCITY = 5.5
-const MOUSE_SENSITIVITY = 0.005
+const MOUSE_SENSITIVITY = 0.002
 const ACCELERATION = 12.0
 const DECELERATION = 18.0
 const ROTATION_SPEED = 12.0
@@ -26,13 +26,21 @@ var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
 @onready var spring_arm = $SpringArm3D
 var animation_player: AnimationPlayer
 
-# State
+# --- Core State ---
 var is_attacking = false
+var is_dodging = false
+var is_invulnerable = false
 var attack_timer = 0.0
 var combo_queued = false
 var combo_count = 0
-var is_dodging = false
 var dodge_timer = 0.0
+
+# Dialogue / Death blocking
+var dialogue_active: bool = false
+var is_dead: bool = false
+var death_handled: bool = false
+
+var mobile_controls = null
 var dodge_direction = Vector3.ZERO
 var coyote_timer = 0.0
 var jump_buffer_timer = 0.0
@@ -90,14 +98,39 @@ func _ready():
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	add_to_group("player")
 	
-	if not InputMap.has_action("sprint"):
-		InputMap.add_action("sprint")
-		var ev = InputEventKey.new()
-		ev.physical_keycode = Key.KEY_SHIFT
-		InputMap.action_add_event("sprint", ev)
+	if DisplayServer.is_touchscreen_available():
+		var mobile_controls_script = load("res://scripts/MobileControls.gd")
+		if mobile_controls_script:
+			mobile_controls = mobile_controls_script.new()
+			add_child(mobile_controls)
+			mobile_controls.camera_dragged.connect(_on_camera_dragged)
+	
+	# Register movement InputMap actions
+	for action_data in [
+		["move_forward", KEY_W],
+		["move_back", KEY_S],
+		["move_left", KEY_A],
+		["move_right", KEY_D],
+		["sprint", KEY_SHIFT],
+		["jump", KEY_SPACE]
+	]:
+		if not InputMap.has_action(action_data[0]):
+			InputMap.add_action(action_data[0])
+			var ev = InputEventKey.new()
+			ev.keycode = action_data[1]
+			InputMap.action_add_event(action_data[0], ev)
 	
 	_setup_audio()
 	_setup_character()
+	
+	# Connect to dialogue signals
+	call_deferred("_connect_dialogue_signals")
+
+func _connect_dialogue_signals():
+	var dialogue_ui = get_node_or_null("/root/Main/DialogueUI")
+	if dialogue_ui:
+		dialogue_ui.dialogue_opened.connect(func(): dialogue_active = true)
+		dialogue_ui.dialogue_closed.connect(func(): dialogue_active = false)
 
 func _setup_audio():
 	# Attack sounds (varied for combo)
@@ -189,7 +222,6 @@ func _setup_character():
 	# NOTE: Godot strips "_Loop" suffix when importing GLB animations!
 	# e.g. "Sprint_Loop" in the GLB becomes just "Sprint" in Godot
 	var all_anims = animation_player.get_animation_list()
-	print("=== ALL ANIMATIONS: ", all_anims, " ===")
 	
 	# Map roles to animations using keyword search on actual Godot names
 	for a in all_anims:
@@ -248,10 +280,7 @@ func _setup_character():
 	if "attack2" not in anim_map and "attack1" in anim_map:
 		anim_map["attack2"] = anim_map["attack1"]
 	
-	print("=== ANIMATION MAP ===")
-	for key in anim_map:
-		print("  ", key, " -> ", anim_map[key])
-	print("=====================")
+
 
 	# 2. Setup Modular Outfit (Male_Ranger)
 	var outfit_scene = load("res://assets/models/Male_Ranger.gltf")
@@ -357,6 +386,7 @@ func _dodge():
 	if is_dodging or not is_on_floor(): return
 	
 	is_dodging = true
+	is_invulnerable = true
 	dodge_timer = DODGE_DURATION
 	
 	# Direction: movement direction or backwards
@@ -376,6 +406,9 @@ func _dodge():
 		animation_player.play(anim_map["roll"])
 
 func take_damage(amount: float):
+	if is_dead:
+		return
+	
 	current_hp -= amount
 	current_hp = max(current_hp, 0)
 	camera_shake(0.2)
@@ -387,6 +420,28 @@ func take_damage(amount: float):
 	var hud = get_node_or_null("/root/Main/HUD")
 	if hud and hud.has_method("update_player_hp"):
 		hud.update_player_hp(current_hp, max_hp)
+	
+	# Check for death
+	if current_hp <= 0 and not is_dead:
+		_handle_death()
+
+func _handle_death():
+	is_dead = true
+	is_attacking = false
+	is_dodging = false
+	
+	# Play death animation if available
+	if animation_player and "death" in anim_map:
+		animation_player.play(anim_map["death"])
+	
+	# After 1.5 seconds, show death screen
+	var timer = get_tree().create_timer(1.5)
+	timer.timeout.connect(_show_death_screen)
+
+func _show_death_screen():
+	var death_screen = get_node_or_null("/root/Main/DeathScreen")
+	if death_screen and death_screen.has_method("show_death_screen"):
+		death_screen.show_death_screen()
 
 func camera_shake(intensity: float):
 	shake_amount = intensity
@@ -410,33 +465,57 @@ func _spawn_damage_number(pos: Vector3, damage: int):
 # === INPUT ===
 
 func _unhandled_input(event):
+	# Block all input during dialogue or death
+	if dialogue_active or is_dead:
+		return
+	
 	if event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
 		spring_arm.rotation.y -= event.relative.x * MOUSE_SENSITIVITY
 		spring_arm.rotation.x -= event.relative.y * MOUSE_SENSITIVITY
 		spring_arm.rotation.x = clamp(spring_arm.rotation.x, -PI/4, PI/4)
-		
-	if event.is_action_pressed("ui_cancel"):
-		if Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
-			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
-		else:
-			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+	
+	# ESC is now handled by PauseMenu
 			
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 		_attack()
+	elif event.is_action_pressed("attack"):
+		_attack()
+
+func _on_camera_dragged(relative: Vector2):
+	spring_arm.rotation.y -= relative.x * MOUSE_SENSITIVITY
+	spring_arm.rotation.x -= relative.y * MOUSE_SENSITIVITY
+	spring_arm.rotation.x = clamp(spring_arm.rotation.x, -PI/4, PI/4)
 
 func _get_input_direction() -> Vector3:
 	var input_dir = Vector2.ZERO
-	if Input.is_key_pressed(KEY_W): input_dir.y -= 1
-	if Input.is_key_pressed(KEY_S): input_dir.y += 1
-	if Input.is_key_pressed(KEY_A): input_dir.x -= 1
-	if Input.is_key_pressed(KEY_D): input_dir.x += 1
-	input_dir = input_dir.normalized()
+	if Input.is_action_pressed("move_forward"): input_dir.y -= 1
+	if Input.is_action_pressed("move_back"): input_dir.y += 1
+	if Input.is_action_pressed("move_left"): input_dir.x -= 1
+	if Input.is_action_pressed("move_right"): input_dir.x += 1
+	
+	if mobile_controls and mobile_controls.joystick_active:
+		input_dir += mobile_controls.joystick_vector
+		
+	if input_dir.length() > 1.0:
+		input_dir = input_dir.normalized()
+		
 	return (spring_arm.transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
 
 # === PHYSICS (MAIN GAME LOOP) ===
 
 func _physics_process(delta):
+	# Block all processing during dialogue or death
+	if dialogue_active or is_dead:
+		if is_dead:
+			# Still apply gravity when dead so body doesn't float
+			if not is_on_floor():
+				velocity.y -= gravity * delta
+			velocity.x = lerp(velocity.x, 0.0, DECELERATION * delta)
+			velocity.z = lerp(velocity.z, 0.0, DECELERATION * delta)
+			move_and_slide()
+		return
+	
 	var on_floor = is_on_floor()
 	
 	# --- Coyote Time ---
@@ -476,7 +555,7 @@ func _physics_process(delta):
 	was_on_floor = on_floor
 	
 	# --- Dodge (Q key) ---
-	if Input.is_key_pressed(KEY_Q) and not is_dodging and not is_attacking and on_floor:
+	if (Input.is_key_pressed(KEY_Q) or Input.is_action_pressed("dodge")) and not is_dodging and not is_attacking and on_floor:
 		_dodge()
 	
 	if is_dodging:
@@ -485,6 +564,7 @@ func _physics_process(delta):
 		velocity.z = dodge_direction.z * DODGE_SPEED
 		if dodge_timer <= 0:
 			is_dodging = false
+			is_invulnerable = false
 		move_and_slide()
 		return
 	
@@ -504,7 +584,7 @@ func _physics_process(delta):
 	var direction = _get_input_direction()
 	
 	var current_speed = WALK_SPEED
-	var is_sprinting = Input.is_action_pressed("sprint") or Input.is_key_pressed(KEY_SHIFT) or Input.is_physical_key_pressed(KEY_SHIFT)
+	var is_sprinting = Input.is_action_pressed("sprint")
 	if is_sprinting:
 		current_speed = SPRINT_SPEED
 	
@@ -537,7 +617,6 @@ func _physics_process(delta):
 				animation_player.speed_scale = 1.0
 			if target_anim != "":
 				if animation_player.current_animation != target_anim:
-					print("PLAY: ", target_anim, " (was: ", animation_player.current_animation, ")")
 					animation_player.play(target_anim)
 		else:
 			if not on_floor:

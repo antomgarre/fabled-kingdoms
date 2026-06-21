@@ -21,9 +21,9 @@ func _ready():
 
 # Generates a JSON payload for a new NPC or Enemy
 func request_npc_generation(location_context: String, callback: Callable):
-	print("AIManager: Buscando mundo pre-compilado para la region: ", location_context)
+	push_warning("AIManager: Buscando mundo pre-compilado para la region: " + location_context)
 	
-	var file_path = "res://../generated_worlds/dark_forest_compiled.json"
+	var file_path = "res://data/dark_forest_compiled.json"
 	if not FileAccess.file_exists(file_path):
 		push_error("No se encontró el mundo compilado en " + file_path)
 		return

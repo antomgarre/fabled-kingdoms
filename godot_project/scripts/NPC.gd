@@ -12,6 +12,12 @@ var current_health = 100
 
 var player: Node3D
 
+# === INTERACTION ===
+var dialogue_opening: String = ""
+var npc_display_name: String = ""
+var player_in_range: bool = false
+var interaction_indicator: Label3D
+
 func _ready():
 	# Find player for distance checking
 	var players = get_tree().get_nodes_in_group("player")
@@ -26,7 +32,83 @@ func initialize(data: Dictionary):
 	max_health = data["stats"]["health"]
 	current_health = max_health
 	
+	# Store dialogue and display name
+	npc_display_name = data.get("name", "NPC")
+	dialogue_opening = data.get("dialogue_opening", "")
+	
 	_assemble_visuals(data["visuals"])
+	
+	# Only add interaction zone for non-enemy NPCs
+	var role = data.get("role", "")
+	if role != "ENEMY":
+		_setup_interaction_zone()
+
+func _setup_interaction_zone():
+	# Create Area3D for interaction detection
+	var area = Area3D.new()
+	area.name = "InteractionZone"
+	# Set on a high layer/mask bit so it doesn't interfere with physics
+	area.collision_layer = 0
+	area.collision_mask = 1  # Detect player (layer 1)
+	area.body_entered.connect(_on_interaction_body_entered)
+	area.body_exited.connect(_on_interaction_body_exited)
+	
+	var col = CollisionShape3D.new()
+	var sphere = SphereShape3D.new()
+	sphere.radius = 3.0
+	col.shape = sphere
+	col.position = Vector3(0, 1, 0)
+	area.add_child(col)
+	add_child(area)
+	
+	# Floating "Pulsa E" indicator above head
+	interaction_indicator = Label3D.new()
+	interaction_indicator.name = "InteractionIndicator"
+	interaction_indicator.text = "[ E ] Hablar"
+	interaction_indicator.font_size = 32
+	interaction_indicator.outline_size = 6
+	interaction_indicator.modulate = Color(0.79, 0.66, 0.43, 1.0)
+	interaction_indicator.outline_modulate = Color(0, 0, 0, 0.9)
+	interaction_indicator.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	interaction_indicator.no_depth_test = true
+	interaction_indicator.position = Vector3(0, 3.2, 0)
+	interaction_indicator.visible = false
+	add_child(interaction_indicator)
+
+func _on_interaction_body_entered(body: Node3D):
+	if body.is_in_group("player"):
+		player_in_range = true
+		if interaction_indicator:
+			interaction_indicator.visible = true
+			# Fade in
+			interaction_indicator.modulate = Color(0.79, 0.66, 0.43, 0.0)
+			var tween = create_tween()
+			tween.tween_property(interaction_indicator, "modulate", Color(0.79, 0.66, 0.43, 1.0), 0.3)
+
+func _on_interaction_body_exited(body: Node3D):
+	if body.is_in_group("player"):
+		player_in_range = false
+		if interaction_indicator:
+			var tween = create_tween()
+			tween.tween_property(interaction_indicator, "modulate", Color(0.79, 0.66, 0.43, 0.0), 0.2)
+			tween.tween_callback(func(): interaction_indicator.visible = false)
+
+func _unhandled_input(event):
+	if not player_in_range:
+		return
+	if dialogue_opening == "":
+		return
+	
+	# Check for E key press
+	if event is InputEventKey and event.pressed and not event.echo:
+		if event.keycode == KEY_E or event.physical_keycode == KEY_E:
+			_start_dialogue()
+
+func _start_dialogue():
+	var dialogue_ui = get_node_or_null("/root/Main/DialogueUI")
+	if dialogue_ui and not dialogue_ui.is_open:
+		dialogue_ui.show_dialogue(npc_display_name, dialogue_opening)
+		get_viewport().set_input_as_handled()
 
 func _assemble_visuals(visuals: Dictionary):
 	var base_name = visuals["base_body"]
@@ -154,6 +236,10 @@ func _physics_process(delta):
 		
 	if npc_data.is_empty():
 		return # Still loading
+		
+	# Bob the interaction indicator gently
+	if interaction_indicator and interaction_indicator.visible:
+		interaction_indicator.position.y = 3.2 + sin(Time.get_ticks_msec() * 0.003) * 0.1
 		
 	if animation_player:
 		var horizontal_vel = Vector2(velocity.x, velocity.z)
