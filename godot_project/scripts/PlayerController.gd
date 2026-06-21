@@ -55,7 +55,8 @@ var sfx_attack: AudioStreamPlayer
 var sfx_footstep: AudioStreamPlayer
 var sfx_dodge: AudioStreamPlayer
 var sfx_hurt: AudioStreamPlayer
-var footsteps = []
+var footsteps_grass = []
+var footsteps_dirt = []
 var attack_sounds = []
 var step_timer = 0.0
 
@@ -65,6 +66,7 @@ var shake_decay = 8.0
 
 # Animation map (resolved at load time)
 var anim_map = {}
+var footstep_particles: GPUParticles3D
 
 # === UTILITY FUNCTIONS ===
 
@@ -122,6 +124,7 @@ func _ready():
 	
 	_setup_audio()
 	_setup_character()
+	_setup_particles()
 	
 	# Connect to dialogue signals
 	call_deferred("_connect_dialogue_signals")
@@ -147,10 +150,14 @@ func _setup_audio():
 	sfx_footstep = AudioStreamPlayer.new()
 	sfx_footstep.volume_db = -10.0
 	add_child(sfx_footstep)
+	for i in range(5):
+		var path = "res://assets/sounds/footstep_grass_00" + str(i) + ".ogg"
+		if ResourceLoader.exists(path):
+			footsteps_grass.append(load(path))
 	for i in range(10):
 		var path = "res://assets/sounds/footstep0" + str(i) + ".ogg"
 		if ResourceLoader.exists(path):
-			footsteps.append(load(path))
+			footsteps_dirt.append(load(path))
 	
 	# Dodge sound
 	sfx_dodge = AudioStreamPlayer.new()
@@ -341,6 +348,9 @@ func _on_sword_body_entered(body):
 			var damage = 20 if combo_count == 0 else 30 # Combo hit = more damage
 			body.take_damage(damage)
 			
+			# Spawn sparks
+			_spawn_combat_sparks(body.global_position + Vector3(0, 1.5, 0))
+			
 			# Spawn floating damage number
 			_spawn_damage_number(body.global_position + Vector3(0, 2.5, 0), damage)
 
@@ -462,6 +472,86 @@ func _spawn_damage_number(pos: Vector3, damage: int):
 	tween.parallel().tween_property(label, "modulate:a", 0.0, 0.8)
 	tween.tween_callback(label.queue_free)
 
+func _setup_particles():
+	footstep_particles = GPUParticles3D.new()
+	footstep_particles.amount = 15
+	footstep_particles.lifetime = 0.5
+	footstep_particles.emitting = false
+	
+	var dust_mat = StandardMaterial3D.new()
+	dust_mat.albedo_color = Color(0.4, 0.3, 0.2, 0.6)
+	dust_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	dust_mat.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
+	dust_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	
+	var quad = QuadMesh.new()
+	quad.size = Vector2(0.3, 0.3)
+	quad.material = dust_mat
+	footstep_particles.draw_pass_1 = quad
+	
+	var dust_proc = ParticleProcessMaterial.new()
+	dust_proc.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_BOX
+	dust_proc.emission_box_extents = Vector3(0.2, 0.05, 0.2)
+	dust_proc.direction = Vector3(0, 1, 0)
+	dust_proc.spread = 30.0
+	dust_proc.initial_velocity_min = 0.5
+	dust_proc.initial_velocity_max = 1.0
+	dust_proc.gravity = Vector3(0, 0, 0)
+	
+	var curve = Curve.new()
+	curve.add_point(Vector2(0, 1))
+	curve.add_point(Vector2(1, 0))
+	var curve_tex = CurveTexture.new()
+	curve_tex.curve = curve
+	dust_proc.scale_curve = curve_tex
+	
+	footstep_particles.process_material = dust_proc
+	
+	add_child(footstep_particles)
+	footstep_particles.position = Vector3(0, 0.1, 0)
+
+func _spawn_combat_sparks(pos: Vector3):
+	var sparks = GPUParticles3D.new()
+	sparks.amount = 15
+	sparks.lifetime = 0.3
+	sparks.one_shot = true
+	sparks.explosiveness = 0.9
+	
+	var mat = StandardMaterial3D.new()
+	mat.albedo_color = Color(1.0, 0.7, 0.2)
+	mat.emission_enabled = true
+	mat.emission = Color(1.0, 0.5, 0.1)
+	mat.emission_energy_multiplier = 2.0
+	mat.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
+	
+	var mesh = QuadMesh.new()
+	mesh.size = Vector2(0.15, 0.15)
+	mesh.material = mat
+	sparks.draw_pass_1 = mesh
+	
+	var proc = ParticleProcessMaterial.new()
+	proc.direction = Vector3(0, 1, 0)
+	proc.spread = 180.0
+	proc.initial_velocity_min = 2.0
+	proc.initial_velocity_max = 4.0
+	proc.gravity = Vector3(0, -5.0, 0)
+	
+	var curve = Curve.new()
+	curve.add_point(Vector2(0, 1))
+	curve.add_point(Vector2(1, 0))
+	var curve_tex = CurveTexture.new()
+	curve_tex.curve = curve
+	proc.scale_curve = curve_tex
+	
+	sparks.process_material = proc
+	
+	get_tree().root.add_child(sparks)
+	sparks.global_position = pos
+	sparks.emitting = true
+	
+	var timer = get_tree().create_timer(1.0)
+	timer.timeout.connect(sparks.queue_free)
+
 # === INPUT ===
 
 func _unhandled_input(event):
@@ -549,8 +639,11 @@ func _physics_process(delta):
 	if on_floor and not was_on_floor:
 		is_jumping = false
 		# Play landing sound
-		if footsteps.size() > 0:
-			sfx_footstep.stream = footsteps[randi() % footsteps.size()]
+		var active_footsteps = footsteps_dirt if get_floor_normal().y < 0.85 else footsteps_grass
+		if active_footsteps.size() > 0:
+			sfx_footstep.stream = active_footsteps[randi() % active_footsteps.size()]
+			sfx_footstep.pitch_scale = randf_range(0.9, 1.1)
+			sfx_footstep.volume_db = randf_range(-14.0, -10.0)
 			sfx_footstep.play()
 	was_on_floor = on_floor
 	
@@ -587,6 +680,13 @@ func _physics_process(delta):
 	var is_sprinting = Input.is_action_pressed("sprint")
 	if is_sprinting:
 		current_speed = SPRINT_SPEED
+	
+	# Emit footsteps particles
+	if footstep_particles:
+		if on_floor and velocity.length() > 0.5 and not is_jumping:
+			footstep_particles.emitting = true
+		else:
+			footstep_particles.emitting = false
 	
 	# Reduce speed during attack (but don't freeze!)
 	if is_attacking:
@@ -629,9 +729,10 @@ func _physics_process(delta):
 			step_timer -= delta
 			if step_timer <= 0:
 				step_timer = 0.3 if current_speed == SPRINT_SPEED else 0.5
-				if footsteps.size() > 0:
-					sfx_footstep.stream = footsteps[randi() % footsteps.size()]
-					sfx_footstep.pitch_scale = randf_range(0.5, 0.7) # Lower pitch sounds more like dirt/mud, less like wood
+				var active_footsteps = footsteps_dirt if get_floor_normal().y < 0.85 else footsteps_grass
+				if active_footsteps.size() > 0:
+					sfx_footstep.stream = active_footsteps[randi() % active_footsteps.size()]
+					sfx_footstep.pitch_scale = randf_range(0.9, 1.1)
 					sfx_footstep.volume_db = randf_range(-14.0, -10.0) 
 					sfx_footstep.play()
 	else:
