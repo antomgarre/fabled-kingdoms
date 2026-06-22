@@ -50,14 +50,19 @@ var jump_buffer_timer = 0.0
 var was_on_floor = true
 var is_jumping = false
 
-# Health
+# Health & RPG Stats
 var max_hp = 100.0
 var current_hp = 100.0
+var level: int = 1
+var xp: int = 0
+var next_level_xp: int = 100
+var strength_multiplier: float = 1.0
 
 var sfx_attack: AudioStreamPlayer
 var sfx_footstep: AudioStreamPlayer
 var sfx_dodge: AudioStreamPlayer
 var sfx_hurt: AudioStreamPlayer
+var sfx_levelup: AudioStreamPlayer
 var footsteps_grass = []
 var footsteps_dirt = []
 var attack_sounds = []
@@ -284,6 +289,12 @@ func _setup_audio():
 	if ResourceLoader.exists("res://assets/sounds/player_hit.mp3"):
 		sfx_hurt.stream = load("res://assets/sounds/player_hit.mp3")
 	add_child(sfx_hurt)
+	
+	# Level up sound
+	sfx_levelup = AudioStreamPlayer.new()
+	if ResourceLoader.exists("res://assets/sounds/magical_1.ogg"):
+		sfx_levelup.stream = load("res://assets/sounds/magical_1.ogg")
+	add_child(sfx_levelup)
 
 func _setup_character():
 	var character_model = $Pivot/BaseCharacter
@@ -459,14 +470,15 @@ func _setup_character():
 func _on_sword_body_entered(body):
 	if is_attacking and body.is_in_group("enemies"):
 		if body.has_method("take_damage"):
-			var damage = 20 if combo_count == 0 else 30 # Combo hit = more damage
-			body.take_damage(damage)
+			var base_damage = 20.0 if combo_count == 0 else 30.0 # Combo hit = more damage
+			var final_damage = base_damage * strength_multiplier
+			body.take_damage(final_damage)
 			
 			# Spawn sparks
 			_spawn_combat_sparks(body.global_position + Vector3(0, 1.5, 0))
 			
 			# Spawn floating damage number
-			_spawn_damage_number(body.global_position + Vector3(0, 2.5, 0), damage)
+			_spawn_damage_number(body.global_position + Vector3(0, 2.5, 0), int(final_damage))
 
 func _attack():
 	if is_dodging: return
@@ -729,6 +741,60 @@ func _process(delta):
 			camera_shake_intensity = 0.0
 			camera.h_offset = 0.0
 			camera.v_offset = 0.0
+
+# === RPG SYSTEM ===
+
+func gain_xp(amount: int):
+	xp += amount
+	
+	var leveled_up = false
+	while xp >= next_level_xp:
+		_level_up()
+		leveled_up = true
+		
+	var hud = get_node_or_null("/root/Main/HUD")
+	if hud and hud.has_method("update_xp"):
+		hud.update_xp(level, xp, next_level_xp)
+	
+	# If we just gained XP but didn't level up, we can still update the HUD XP pulse
+	if not leveled_up and hud and hud.has_method("pulse_xp"):
+		hud.pulse_xp()
+
+func _level_up():
+	level += 1
+	xp -= next_level_xp
+	next_level_xp = int(next_level_xp * 1.5)
+	
+	# Stats increase
+	max_hp += 20.0
+	current_hp = max_hp # Full heal
+	strength_multiplier += 0.2
+	
+	var hud = get_node_or_null("/root/Main/HUD")
+	if hud:
+		hud.update_player_hp(current_hp, max_hp)
+	
+	# Visual/Audio feedback
+	if sfx_levelup and sfx_levelup.stream:
+		sfx_levelup.play()
+		
+	_spawn_floating_text("LEVEL UP!", Color(1.0, 0.84, 0.0), global_position + Vector3(0, 2.5, 0))
+
+func _spawn_floating_text(text_str: String, color: Color, pos: Vector3):
+	var label = Label3D.new()
+	label.text = text_str
+	label.modulate = color
+	label.pixel_size = 0.03
+	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	label.no_depth_test = true
+	label.global_position = pos
+	
+	get_tree().current_scene.add_child(label)
+	
+	var tween = create_tween()
+	tween.tween_property(label, "global_position:y", pos.y + 2.0, 2.0).set_ease(Tween.EASE_OUT)
+	tween.parallel().tween_property(label, "modulate:a", 0.0, 2.0)
+	tween.tween_callback(label.queue_free)
 
 func _physics_process(delta):
 	# Block all processing during dialogue or death

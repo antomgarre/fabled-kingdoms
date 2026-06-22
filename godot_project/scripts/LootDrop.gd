@@ -74,9 +74,8 @@ func _on_body_entered(body):
 		if qm:
 			qm.add_progress("kill_goblins", 1)
 			
-		var hud = get_node_or_null("/root/Main/HUD")
-		if hud and hud.has_method("add_xp"):
-			hud.add_xp(10)
+		if body.has_method("gain_xp"):
+			body.gain_xp(50) # Increased to 50 for testing the leveling system faster
 			
 		# 4. Free drop
 		queue_free()

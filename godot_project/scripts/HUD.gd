@@ -147,12 +147,12 @@ func update_player_hp(current: float, maximum: float):
 			# If healing, update ghost instantly too
 			hp_ghost_bar.value = current
 
-func add_xp(amount: int):
-	total_xp += amount
+func update_xp(level: int, current: int, maximum: int):
 	if xp_label:
-		xp_label.text = "✦ XP: " + str(total_xp)
-		
-		# Pulse animation for XP gain
+		xp_label.text = "✦ Lvl " + str(level) + " (" + str(current) + "/" + str(maximum) + " XP)"
+
+func pulse_xp():
+	if xp_label:
 		var tween = create_tween()
 		tween.tween_property(xp_label, "modulate", Color(2.0, 2.0, 2.0), 0.1)
 		tween.tween_property(xp_label, "modulate", Color(1.0, 1.0, 1.0), 0.3)
