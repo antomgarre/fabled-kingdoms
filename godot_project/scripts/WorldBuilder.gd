@@ -30,156 +30,117 @@ func _on_region_loaded(region_data: Dictionary):
 
 func _spawn_town_campfire():
 	var campfire = Node3D.new()
+	campfire.name = "Campfire"
 	add_child(campfire)
 	
 	var terrain = get_node("../TerrainGenerator")
 	var y_pos = 0.0
 	if terrain and terrain.has_method("get_height"):
 		y_pos = terrain.get_height(25.0, -25.0)
-	campfire.global_position = Vector3(25.0, y_pos + 0.5, -25.0)
+	campfire.global_position = Vector3(25.0, y_pos, -25.0)
 	
-	# Light
+	# --- Shared materials ---
+	var rock_mat = StandardMaterial3D.new()
+	rock_mat.albedo_color = Color(0.38, 0.34, 0.30)
+	rock_mat.roughness = 1.0
+	
+	var log_mat = StandardMaterial3D.new()
+	log_mat.albedo_color = Color(0.28, 0.18, 0.10)
+	log_mat.roughness = 1.0
+	
+	var ember_mat = StandardMaterial3D.new()
+	ember_mat.albedo_color = Color(1.0, 0.4, 0.0)
+	ember_mat.emission_enabled = true
+	ember_mat.emission = Color(1.0, 0.3, 0.0)
+	ember_mat.emission_energy_multiplier = 3.0
+	ember_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	ember_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	
+	# --- Flickering orange light ---
 	var light = OmniLight3D.new()
 	light.light_color = Color(1.0, 0.6, 0.2)
-	light.omni_range = 25.0
+	light.omni_range = 30.0
 	light.light_energy = 2.0
 	light.shadow_enabled = true
+	light.position = Vector3(0, 1.0, 0)
 	campfire.add_child(light)
+	var flicker = GDScript.new()
+	flicker.source_code = "extends OmniLight3D\nvar t=0.0\nfunc _process(d):\n\tt+=d*12.0\n\tlight_energy=2.0+sin(t)*0.4+cos(t*1.9)*0.25\n"
+	flicker.reload()
+	light.set_script(flicker)
 	
-	# Fire Particles
+	# --- Fire particles ---
 	var particles = GPUParticles3D.new()
-	particles.amount = 30
-	particles.lifetime = 1.0
-	
-	var mat = StandardMaterial3D.new()
-	mat.albedo_color = Color(1.0, 0.4, 0.0)
-	mat.emission_enabled = true
-	mat.emission = Color(1.0, 0.3, 0.0)
-	mat.emission_energy_multiplier = 3.0
-	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	
-	var mesh = SphereMesh.new()
-	mesh.radius = 0.1
-	mesh.height = 0.2
-	mesh.radial_segments = 4
-	mesh.rings = 4
-	mesh.material = mat
-	particles.draw_pass_1 = mesh
-	
+	particles.amount = 25
+	particles.lifetime = 1.2
+	particles.position = Vector3(0, 0.3, 0)
+	var fire_mesh = SphereMesh.new()
+	fire_mesh.radius = 0.12
+	fire_mesh.height = 0.24
+	fire_mesh.radial_segments = 4
+	fire_mesh.rings = 3
+	fire_mesh.material = ember_mat
+	particles.draw_pass_1 = fire_mesh
 	var proc = ParticleProcessMaterial.new()
 	proc.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_SPHERE
-	proc.emission_sphere_radius = 0.4
+	proc.emission_sphere_radius = 0.35
 	proc.direction = Vector3(0, 1, 0)
-	proc.spread = 15.0
-	proc.initial_velocity_min = 1.0
-	proc.initial_velocity_max = 2.0
-	proc.gravity = Vector3(0, 0, 0)
-	
-	var curve = Curve.new()
-	curve.add_point(Vector2(0, 1))
-	curve.add_point(Vector2(1, 0))
-	var curve_tex = CurveTexture.new()
-	curve_tex.curve = curve
-	proc.scale_curve = curve_tex
-	
+	proc.spread = 12.0
+	proc.initial_velocity_min = 1.2
+	proc.initial_velocity_max = 2.5
+	proc.gravity = Vector3(0, 0.2, 0)
+	var fcurve = Curve.new()
+	fcurve.add_point(Vector2(0, 1))
+	fcurve.add_point(Vector2(1, 0))
+	var fct = CurveTexture.new()
+	fct.curve = fcurve
+	proc.scale_curve = fct
 	particles.process_material = proc
 	campfire.add_child(particles)
 	
-	# Simple flicker script
-	var script = GDScript.new()
-	script.source_code = "extends OmniLight3D\nvar time=0.0\nfunc _process(delta):\n\ttime+=delta*15.0\n\tlight_energy = 2.0 + sin(time)*0.3 + cos(time*1.7)*0.2\n"
-	script.reload()
-	light.set_script(script)
-	light.set_process(true)
-	
-	# Rock ring around the fire — radius ~1.4 units
-	var rock_mat = StandardMaterial3D.new()
-	rock_mat.albedo_color = Color(0.35, 0.32, 0.28)
-	rock_mat.roughness = 1.0
-	
-	var ring_positions = [
-		Vector3(1.4, -0.3, 0.0),  Vector3(-1.4, -0.3, 0.0),
-		Vector3(0.0, -0.3, 1.4),  Vector3(0.0, -0.3, -1.4),
-		Vector3(1.0, -0.3, 1.0),  Vector3(-1.0, -0.3, -1.0),
-		Vector3(1.0, -0.3, -1.0), Vector3(-1.0, -0.3, 1.0),
-	]
-	for rp in ring_positions:
-		var rock = MeshInstance3D.new()
-		var rock_mesh = SphereMesh.new()
-		rock_mesh.radius = randf_range(0.15, 0.25)
-		rock_mesh.height = randf_range(0.18, 0.30)
-		rock_mesh.radial_segments = 6
-		rock_mesh.rings = 4
-		rock_mesh.material = rock_mat
-		rock.mesh = rock_mesh
-		rock.position = rp
-		campfire.add_child(rock)
-	
-	# Log seats — far enough to sit comfortably (~4.5 units)
-	var log_mat = StandardMaterial3D.new()
-	log_mat.albedo_color = Color(0.3, 0.2, 0.1)
-	log_mat.roughness = 1.0
-	
-	var log_seats = [
-		{"pos": Vector3(4.5, -0.1,  0.0), "rot_y": 0.0},
-		{"pos": Vector3(-4.5, -0.1, 0.0), "rot_y": 0.0},
-		{"pos": Vector3(0.0,  -0.1, 4.5), "rot_y": PI / 2.0},
-	]
-	for ls in log_seats:
-		var log = MeshInstance3D.new()
-		var log_mesh = CylinderMesh.new()
-		log_mesh.top_radius = 0.22
-		log_mesh.bottom_radius = 0.22
-		log_mesh.height = 1.8
-		log_mesh.material = log_mat
-		log.mesh = log_mesh
-		log.position = ls["pos"]
-		log.rotation = Vector3(0.0, ls["rot_y"], PI / 2.0)
-		campfire.add_child(log)
-	
-	# Central wood pile (X-crossed logs, small, inside the rock ring)
+	# --- Wood pile at center (inside rock ring) ---
 	for i in range(2):
 		var wood = MeshInstance3D.new()
-		var wood_mesh = CylinderMesh.new()
-		wood_mesh.top_radius = 0.07
-		wood_mesh.bottom_radius = 0.09
-		wood_mesh.height = 1.1
-		wood_mesh.material = log_mat
-		wood.mesh = wood_mesh
-		wood.position = Vector3(0, -0.2, 0)
-		wood.rotation = Vector3(PI / 5.0, i * (PI / 2.0), 0.0)
+		var wm = CylinderMesh.new()
+		wm.top_radius = 0.08
+		wm.bottom_radius = 0.10
+		wm.height = 1.3
+		wm.material = log_mat
+		wood.mesh = wm
+		wood.position = Vector3(0, 0.0, 0)
+		wood.rotation = Vector3(deg_to_rad(35.0), i * PI * 0.5, 0.0)
 		campfire.add_child(wood)
 	
-	# Tripod + pot beside the fire (not above it)
-	var tripod_mat = StandardMaterial3D.new()
-	tripod_mat.albedo_color = Color(0.18, 0.15, 0.12)
-	tripod_mat.roughness = 1.0
+	# --- Rock ring at radius 3m ---
+	var rock_angles = [0.0, 45.0, 90.0, 135.0, 180.0, 225.0, 270.0, 315.0]
+	for ang_deg in rock_angles:
+		var ang = deg_to_rad(ang_deg)
+		var rock = MeshInstance3D.new()
+		var rm = SphereMesh.new()
+		rm.radius = randf_range(0.20, 0.35)
+		rm.height = randf_range(0.25, 0.45)
+		rm.radial_segments = 6
+		rm.rings = 4
+		rm.material = rock_mat
+		rock.mesh = rm
+		rock.position = Vector3(sin(ang) * 3.0, -0.15, cos(ang) * 3.0)
+		campfire.add_child(rock)
 	
-	# Three legs leaning over fire from outside the ring
-	var leg_offsets = [Vector3(1.8, 0.0, 0.0), Vector3(-0.9, 0.0, 1.5), Vector3(-0.9, 0.0, -1.5)]
-	for lo in leg_offsets:
-		var leg = MeshInstance3D.new()
-		var leg_mesh = CylinderMesh.new()
-		leg_mesh.top_radius = 0.03
-		leg_mesh.bottom_radius = 0.04
-		leg_mesh.height = 2.2
-		leg_mesh.material = tripod_mat
-		leg.mesh = leg_mesh
-		# Lean toward center
-		leg.position = lo * 0.5 + Vector3(0, 1.0, 0)
-		var angle = Vector3.ZERO.direction_to(lo)
-		leg.rotation = Vector3(deg_to_rad(25), 0, 0).rotated(Vector3.UP, angle.signed_angle_to(Vector3.RIGHT, Vector3.UP))
-		campfire.add_child(leg)
-	
-	var pot = MeshInstance3D.new()
-	var pot_mesh = SphereMesh.new()
-	pot_mesh.radius = 0.28
-	pot_mesh.height = 0.45
-	pot_mesh.material = tripod_mat
-	pot.mesh = pot_mesh
-	pot.position = Vector3(0, 1.7, 0)
-	campfire.add_child(pot)
+	# --- Log seats at radius 8m, facing the fire ---
+	var seat_angles_deg = [0.0, 120.0, 240.0]
+	for ang_deg in seat_angles_deg:
+		var ang = deg_to_rad(ang_deg)
+		var seat = MeshInstance3D.new()
+		var sm = CylinderMesh.new()
+		sm.top_radius = 0.25
+		sm.bottom_radius = 0.25
+		sm.height = 2.0
+		sm.material = log_mat
+		seat.mesh = sm
+		seat.position = Vector3(sin(ang) * 8.0, 0.0, cos(ang) * 8.0)
+		# Lie the log down tangentially (like a bench facing fire)
+		seat.rotation = Vector3(0, ang + PI * 0.5, PI * 0.5)
+		campfire.add_child(seat)
 
 func _spawn_npc(data: Dictionary):
 	var npc_scene = load("res://scenes/NPC.tscn")
