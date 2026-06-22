@@ -92,6 +92,84 @@ func _spawn_town_campfire():
 	script.reload()
 	light.set_script(script)
 	light.set_process(true)
+	
+	# Rock ring around the fire
+	var rock_mat = StandardMaterial3D.new()
+	rock_mat.albedo_color = Color(0.35, 0.32, 0.28)
+	rock_mat.roughness = 1.0
+	
+	var ring_positions = [
+		Vector3(0.8, -0.3, 0.0), Vector3(-0.8, -0.3, 0.0),
+		Vector3(0.0, -0.3, 0.8), Vector3(0.0, -0.3, -0.8),
+		Vector3(0.6, -0.3, 0.6), Vector3(-0.6, -0.3, -0.6),
+		Vector3(0.6, -0.3, -0.6), Vector3(-0.6, -0.3, 0.6),
+	]
+	for rp in ring_positions:
+		var rock = MeshInstance3D.new()
+		var rock_mesh = SphereMesh.new()
+		rock_mesh.radius = randf_range(0.15, 0.28)
+		rock_mesh.height = randf_range(0.2, 0.35)
+		rock_mesh.radial_segments = 6
+		rock_mesh.rings = 4
+		rock_mesh.material = rock_mat
+		rock.mesh = rock_mesh
+		rock.position = rp
+		campfire.add_child(rock)
+	
+	# Log seats (cylinders lying flat) around the fire
+	var log_mat = StandardMaterial3D.new()
+	log_mat.albedo_color = Color(0.3, 0.2, 0.1)
+	log_mat.roughness = 1.0
+	
+	var log_seats = [
+		{"pos": Vector3(2.5, -0.1, 0.0), "rot_y": 0.0},
+		{"pos": Vector3(-2.5, -0.1, 0.0), "rot_y": 0.0},
+		{"pos": Vector3(0.0, -0.1, 2.5), "rot_y": PI / 2.0},
+	]
+	for ls in log_seats:
+		var log = MeshInstance3D.new()
+		var log_mesh = CylinderMesh.new()
+		log_mesh.top_radius = 0.2
+		log_mesh.bottom_radius = 0.2
+		log_mesh.height = 1.6
+		log_mesh.material = log_mat
+		log.mesh = log_mesh
+		log.position = ls["pos"]
+		log.rotation = Vector3(0.0, ls["rot_y"], PI / 2.0)
+		campfire.add_child(log)
+	
+	# Central wood pile (X-crossed logs)
+	for i in range(2):
+		var wood = MeshInstance3D.new()
+		var wood_mesh = CylinderMesh.new()
+		wood_mesh.top_radius = 0.07
+		wood_mesh.bottom_radius = 0.09
+		wood_mesh.height = 1.2
+		wood_mesh.material = log_mat
+		wood.mesh = wood_mesh
+		wood.position = Vector3(0, -0.15, 0)
+		wood.rotation = Vector3(PI / 5.0, i * (PI / 2.0), 0.0)
+		campfire.add_child(wood)
+	
+	# Hanging pot above fire (simple sphere on a stick)
+	var stick = MeshInstance3D.new()
+	var stick_mesh = CylinderMesh.new()
+	stick_mesh.top_radius = 0.03
+	stick_mesh.bottom_radius = 0.03
+	stick_mesh.height = 1.8
+	stick_mesh.material = rock_mat
+	stick.mesh = stick_mesh
+	stick.position = Vector3(0, 0.9, 0)
+	campfire.add_child(stick)
+	
+	var pot = MeshInstance3D.new()
+	var pot_mesh = SphereMesh.new()
+	pot_mesh.radius = 0.25
+	pot_mesh.height = 0.4
+	pot_mesh.material = rock_mat
+	pot.mesh = pot_mesh
+	pot.position = Vector3(0, 1.65, 0)
+	campfire.add_child(pot)
 
 func _spawn_npc(data: Dictionary):
 	var npc_scene = load("res://scenes/NPC.tscn")

@@ -22,9 +22,9 @@
                 "outfit": "AnimatedVillager"
             },
             "position": {
-                "x": 25,
+                "x": 20,
                 "y": 10,
-                "z": -25
+                "z": -22
             },
             "dialogue_opening": "Bienvenido al Ciervo Torcido. ¿Qué necesitas?"
         },
@@ -43,9 +43,9 @@
                 "outfit": "AnimatedKnight"
             },
             "position": {
-                "x": 30,
+                "x": 32,
                 "y": 10,
-                "z": -23
+                "z": -20
             },
             "dialogue_opening": "El río lleva poca agua últimamente..."
         },
