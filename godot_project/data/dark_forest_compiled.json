@@ -149,46 +149,10 @@
             "rotation": {"y": 1.57}
         },
         {
-            "id": "house_wall_1",
-            "type": "Wall_Plaster_Straight",
-            "position": {"x": 60, "y": 0, "z": -22},
+            "id": "house_modular",
+            "type": "ModularHouse",
+            "position": {"x": 60, "y": 0, "z": -20},
             "rotation": {"y": 0}
-        },
-        {
-            "id": "house_wall_2",
-            "type": "Wall_Plaster_Straight",
-            "position": {"x": 60, "y": 0, "z": -18},
-            "rotation": {"y": 3.14}
-        },
-        {
-            "id": "house_wall_3",
-            "type": "Wall_Plaster_Straight",
-            "position": {"x": 62, "y": 0, "z": -20},
-            "rotation": {"y": -1.57}
-        },
-        {
-            "id": "house_wall_4",
-            "type": "Wall_Plaster_Door_Flat",
-            "position": {"x": 58, "y": 0, "z": -20},
-            "rotation": {"y": 1.57}
-        },
-        {
-            "id": "house_floor",
-            "type": "Floor_WoodDark",
-            "position": {"x": 60, "y": 0.05, "z": -20},
-            "rotation": {"y": 0}
-        },
-        {
-            "id": "house_roof",
-            "type": "Roof_Wooden_2x1",
-            "position": {"x": 60, "y": 2.8, "z": -20},
-            "rotation": {"y": 0}
-        },
-        {
-            "id": "house_door",
-            "type": "Door_1_Flat",
-            "position": {"x": 58, "y": 0, "z": -20},
-            "rotation": {"y": 1.57}
         },
         {
             "id": "prop_barrel_1",

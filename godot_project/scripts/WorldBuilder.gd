@@ -186,34 +186,44 @@ func _spawn_enemy(data: Dictionary):
 
 func _spawn_prop(data: Dictionary):
 	var type = data["type"]
-	var model_path = "res://assets/models/" + type + ".gltf"
 	
-	if ResourceLoader.exists(model_path):
-		var packed_scene = load(model_path)
-		var prop = packed_scene.instantiate()
-		
-		if data.has("position"):
-			var pos = data["position"]
-			var terrain = get_node("../TerrainGenerator")
-			var y_pos = pos["y"]
-			var is_underwater = false
-			
-			if terrain and terrain.has_method("get_height"):
-				var h = terrain.get_height(pos["x"], pos["z"])
-				if h < terrain.water_level:
-					is_underwater = true
-				y_pos = h
-			
-			# Don't plant trees underwater!
-			if is_underwater and (type.contains("Tree") or type.contains("Pine")):
-				prop.free()
-				return
-				
-			add_child(prop)
-			prop.global_position = Vector3(pos["x"], y_pos, pos["z"])
-			
+	var prop: Node3D
+	
+	if type == "ModularHouse":
+		var script = load("res://scripts/ModularHouse.gd")
+		prop = Node3D.new()
+		prop.set_script(script)
+	else:
+		var model_path = "res://assets/models/" + type + ".gltf"
+		if ResourceLoader.exists(model_path):
+			var packed_scene = load(model_path)
+			prop = packed_scene.instantiate()
 		else:
-			add_child(prop)
+			push_error("WorldBuilder: Missing prop model -> " + model_path)
+			return
+			
+	if data.has("position"):
+		var pos = data["position"]
+		var terrain = get_node("../TerrainGenerator")
+		var y_pos = pos["y"]
+		var is_underwater = false
+		
+		if terrain and terrain.has_method("get_height"):
+			var h = terrain.get_height(pos["x"], pos["z"])
+			if h < terrain.water_level:
+				is_underwater = true
+			y_pos = h
+		
+		# Don't plant trees underwater!
+		if is_underwater and (type.contains("Tree") or type.contains("Pine")):
+			prop.free()
+			return
+			
+		add_child(prop)
+		prop.global_position = Vector3(pos["x"], y_pos, pos["z"])
+		
+	else:
+		add_child(prop)
 			
 		if data.has("rotation"):
 			var rot = data["rotation"]
