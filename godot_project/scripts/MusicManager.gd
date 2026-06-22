@@ -237,7 +237,7 @@ func _fill_combat() -> void:
 
 		# ---- Bass drone: low sine one octave below current chord root ----
 		var chord_slot  := (_cmbt_beat_idx / CHORD_BEATS) % 4
-		var bass_freq   := SCALE_FREQS[CHORD_ROOTS_IDX[chord_slot]] * 0.5
+		var bass_freq: float = SCALE_FREQS[CHORD_ROOTS_IDX[chord_slot]] * 0.5
 		_cmbt_bass_phase += TWO_PI * bass_freq * dt
 		if _cmbt_bass_phase > TWO_PI:
 			_cmbt_bass_phase -= TWO_PI
