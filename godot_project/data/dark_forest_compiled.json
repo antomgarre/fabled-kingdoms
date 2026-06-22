@@ -66,11 +66,8 @@
             "backstory": "Asalta a los viajeros despistados.",
             "stats": {"health": 100, "speed": 4, "aggressiveness": 0.85},
             "visuals": {
-                "base_body": "ladron_unido",
-                "outfit": "ladron_unido",
-                "animation_library": "res://assets/animations/EnemyAnimationLibrary.res",
-                "texture": "res://assets/models/ladron_unido_Color_5db537b7-96b5-441d-a5ac-d1be5831c58c.jpg",
-                "idle_animations": ["Idle", "Ninja_Idle", "Rumba_Dancing", "mutant breathing idle", "mutant flexing muscles", "mutant idle (2)", "mutant left turn 45", "mutant right turn 45"]
+                "base_body": "AnimatedEnemy",
+                "outfit": "AnimatedEnemy"
             },
             "position": {"x": 40, "y": 0, "z": -35},
             "dialogue_opening": "¡Tu oro o tu vida!"
@@ -82,10 +79,8 @@
             "backstory": "Antiguo héroe consumido por la oscuridad del bosque.",
             "stats": {"health": 400, "speed": 5, "aggressiveness": 1.0},
             "visuals": {
-                "base_body": "Superhero_Male_FullBody",
-                "outfit": "Superhero_Male_FullBody",
-                "animation_library": "res://assets/animations/EnemyAnimationLibrary.res",
-                "idle_animations": ["mutant roaring", "mutant jump attack", "mutant breathing idle"]
+                "base_body": "AnimatedEnemy",
+                "outfit": "AnimatedEnemy"
             },
             "position": {"x": 30, "y": 0, "z": -60},
             "scale": 1.5,
