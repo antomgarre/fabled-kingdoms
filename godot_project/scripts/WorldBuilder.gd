@@ -93,22 +93,22 @@ func _spawn_town_campfire():
 	light.set_script(script)
 	light.set_process(true)
 	
-	# Rock ring around the fire
+	# Rock ring around the fire — radius ~1.4 units
 	var rock_mat = StandardMaterial3D.new()
 	rock_mat.albedo_color = Color(0.35, 0.32, 0.28)
 	rock_mat.roughness = 1.0
 	
 	var ring_positions = [
-		Vector3(0.8, -0.3, 0.0), Vector3(-0.8, -0.3, 0.0),
-		Vector3(0.0, -0.3, 0.8), Vector3(0.0, -0.3, -0.8),
-		Vector3(0.6, -0.3, 0.6), Vector3(-0.6, -0.3, -0.6),
-		Vector3(0.6, -0.3, -0.6), Vector3(-0.6, -0.3, 0.6),
+		Vector3(1.4, -0.3, 0.0),  Vector3(-1.4, -0.3, 0.0),
+		Vector3(0.0, -0.3, 1.4),  Vector3(0.0, -0.3, -1.4),
+		Vector3(1.0, -0.3, 1.0),  Vector3(-1.0, -0.3, -1.0),
+		Vector3(1.0, -0.3, -1.0), Vector3(-1.0, -0.3, 1.0),
 	]
 	for rp in ring_positions:
 		var rock = MeshInstance3D.new()
 		var rock_mesh = SphereMesh.new()
-		rock_mesh.radius = randf_range(0.15, 0.28)
-		rock_mesh.height = randf_range(0.2, 0.35)
+		rock_mesh.radius = randf_range(0.15, 0.25)
+		rock_mesh.height = randf_range(0.18, 0.30)
 		rock_mesh.radial_segments = 6
 		rock_mesh.rings = 4
 		rock_mesh.material = rock_mat
@@ -116,59 +116,69 @@ func _spawn_town_campfire():
 		rock.position = rp
 		campfire.add_child(rock)
 	
-	# Log seats (cylinders lying flat) around the fire
+	# Log seats — far enough to sit comfortably (~4.5 units)
 	var log_mat = StandardMaterial3D.new()
 	log_mat.albedo_color = Color(0.3, 0.2, 0.1)
 	log_mat.roughness = 1.0
 	
 	var log_seats = [
-		{"pos": Vector3(2.5, -0.1, 0.0), "rot_y": 0.0},
-		{"pos": Vector3(-2.5, -0.1, 0.0), "rot_y": 0.0},
-		{"pos": Vector3(0.0, -0.1, 2.5), "rot_y": PI / 2.0},
+		{"pos": Vector3(4.5, -0.1,  0.0), "rot_y": 0.0},
+		{"pos": Vector3(-4.5, -0.1, 0.0), "rot_y": 0.0},
+		{"pos": Vector3(0.0,  -0.1, 4.5), "rot_y": PI / 2.0},
 	]
 	for ls in log_seats:
 		var log = MeshInstance3D.new()
 		var log_mesh = CylinderMesh.new()
-		log_mesh.top_radius = 0.2
-		log_mesh.bottom_radius = 0.2
-		log_mesh.height = 1.6
+		log_mesh.top_radius = 0.22
+		log_mesh.bottom_radius = 0.22
+		log_mesh.height = 1.8
 		log_mesh.material = log_mat
 		log.mesh = log_mesh
 		log.position = ls["pos"]
 		log.rotation = Vector3(0.0, ls["rot_y"], PI / 2.0)
 		campfire.add_child(log)
 	
-	# Central wood pile (X-crossed logs)
+	# Central wood pile (X-crossed logs, small, inside the rock ring)
 	for i in range(2):
 		var wood = MeshInstance3D.new()
 		var wood_mesh = CylinderMesh.new()
 		wood_mesh.top_radius = 0.07
 		wood_mesh.bottom_radius = 0.09
-		wood_mesh.height = 1.2
+		wood_mesh.height = 1.1
 		wood_mesh.material = log_mat
 		wood.mesh = wood_mesh
-		wood.position = Vector3(0, -0.15, 0)
+		wood.position = Vector3(0, -0.2, 0)
 		wood.rotation = Vector3(PI / 5.0, i * (PI / 2.0), 0.0)
 		campfire.add_child(wood)
 	
-	# Hanging pot above fire (simple sphere on a stick)
-	var stick = MeshInstance3D.new()
-	var stick_mesh = CylinderMesh.new()
-	stick_mesh.top_radius = 0.03
-	stick_mesh.bottom_radius = 0.03
-	stick_mesh.height = 1.8
-	stick_mesh.material = rock_mat
-	stick.mesh = stick_mesh
-	stick.position = Vector3(0, 0.9, 0)
-	campfire.add_child(stick)
+	# Tripod + pot beside the fire (not above it)
+	var tripod_mat = StandardMaterial3D.new()
+	tripod_mat.albedo_color = Color(0.18, 0.15, 0.12)
+	tripod_mat.roughness = 1.0
+	
+	# Three legs leaning over fire from outside the ring
+	var leg_offsets = [Vector3(1.8, 0.0, 0.0), Vector3(-0.9, 0.0, 1.5), Vector3(-0.9, 0.0, -1.5)]
+	for lo in leg_offsets:
+		var leg = MeshInstance3D.new()
+		var leg_mesh = CylinderMesh.new()
+		leg_mesh.top_radius = 0.03
+		leg_mesh.bottom_radius = 0.04
+		leg_mesh.height = 2.2
+		leg_mesh.material = tripod_mat
+		leg.mesh = leg_mesh
+		# Lean toward center
+		leg.position = lo * 0.5 + Vector3(0, 1.0, 0)
+		var angle = Vector3.ZERO.direction_to(lo)
+		leg.rotation = Vector3(deg_to_rad(25), 0, 0).rotated(Vector3.UP, angle.signed_angle_to(Vector3.RIGHT, Vector3.UP))
+		campfire.add_child(leg)
 	
 	var pot = MeshInstance3D.new()
 	var pot_mesh = SphereMesh.new()
-	pot_mesh.radius = 0.25
-	pot_mesh.height = 0.4
-	pot_mesh.material = rock_mat
+	pot_mesh.radius = 0.28
+	pot_mesh.height = 0.45
+	pot_mesh.material = tripod_mat
 	pot.mesh = pot_mesh
-	pot.position = Vector3(0, 1.65, 0)
+	pot.position = Vector3(0, 1.7, 0)
 	campfire.add_child(pot)
 
 func _spawn_npc(data: Dictionary):
