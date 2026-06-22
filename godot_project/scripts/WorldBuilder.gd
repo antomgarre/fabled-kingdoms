@@ -24,7 +24,74 @@ func _on_region_loaded(region_data: Dictionary):
 		for prop_data in region_data["environment_props"]:
 			_spawn_prop(prop_data)
 			
+	_spawn_town_campfire()
+			
 	print("WorldBuilder: Region assembly complete!")
+
+func _spawn_town_campfire():
+	var campfire = Node3D.new()
+	add_child(campfire)
+	
+	var terrain = get_node("../TerrainGenerator")
+	var y_pos = 0.0
+	if terrain and terrain.has_method("get_height"):
+		y_pos = terrain.get_height(25.0, -25.0)
+	campfire.global_position = Vector3(25.0, y_pos + 0.5, -25.0)
+	
+	# Light
+	var light = OmniLight3D.new()
+	light.light_color = Color(1.0, 0.6, 0.2)
+	light.omni_range = 25.0
+	light.light_energy = 2.0
+	light.shadow_enabled = true
+	campfire.add_child(light)
+	
+	# Fire Particles
+	var particles = GPUParticles3D.new()
+	particles.amount = 30
+	particles.lifetime = 1.0
+	
+	var mat = StandardMaterial3D.new()
+	mat.albedo_color = Color(1.0, 0.4, 0.0)
+	mat.emission_enabled = true
+	mat.emission = Color(1.0, 0.3, 0.0)
+	mat.emission_energy_multiplier = 3.0
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	
+	var mesh = SphereMesh.new()
+	mesh.radius = 0.1
+	mesh.height = 0.2
+	mesh.radial_segments = 4
+	mesh.rings = 4
+	mesh.material = mat
+	particles.draw_pass_1 = mesh
+	
+	var proc = ParticleProcessMaterial.new()
+	proc.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_SPHERE
+	proc.emission_sphere_radius = 0.4
+	proc.direction = Vector3(0, 1, 0)
+	proc.spread = 15.0
+	proc.initial_velocity_min = 1.0
+	proc.initial_velocity_max = 2.0
+	proc.gravity = Vector3(0, 0, 0)
+	
+	var curve = Curve.new()
+	curve.add_point(Vector2(0, 1))
+	curve.add_point(Vector2(1, 0))
+	var curve_tex = CurveTexture.new()
+	curve_tex.curve = curve
+	proc.scale_curve = curve_tex
+	
+	particles.process_material = proc
+	campfire.add_child(particles)
+	
+	# Simple flicker script
+	var script = GDScript.new()
+	script.source_code = "extends OmniLight3D\nvar time=0.0\nfunc _process(delta):\n\ttime+=delta*15.0\n\tlight_energy = 2.0 + sin(time)*0.3 + cos(time*1.7)*0.2\n"
+	script.reload()
+	light.set_script(script)
+	light.set_process(true)
 
 func _spawn_npc(data: Dictionary):
 	var npc_scene = load("res://scenes/NPC.tscn")
