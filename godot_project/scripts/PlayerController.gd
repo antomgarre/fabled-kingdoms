@@ -24,7 +24,10 @@ var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
 
 @onready var pivot = $Pivot
 @onready var spring_arm = $SpringArm3D
+@onready var camera = $SpringArm3D/Camera3D
 var animation_player: AnimationPlayer
+
+var camera_shake_intensity = 0.0
 
 # --- Core State ---
 var is_attacking = false
@@ -513,6 +516,12 @@ func _setup_particles():
 	footstep_particles.position = Vector3(0, 0.1, 0)
 
 func _spawn_combat_sparks(pos: Vector3):
+	Engine.time_scale = 0.1
+	var timer = get_tree().create_timer(0.05, true, false, true)
+	timer.timeout.connect(func(): Engine.time_scale = 1.0)
+	
+	camera_shake_intensity = 0.3
+	
 	var sparks = GPUParticles3D.new()
 	sparks.amount = 15
 	sparks.lifetime = 0.3
@@ -595,6 +604,16 @@ func _get_input_direction() -> Vector3:
 	return (spring_arm.transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
 
 # === PHYSICS (MAIN GAME LOOP) ===
+
+func _process(delta):
+	if camera_shake_intensity > 0:
+		camera.h_offset = randf_range(-camera_shake_intensity, camera_shake_intensity)
+		camera.v_offset = randf_range(-camera_shake_intensity, camera_shake_intensity)
+		camera_shake_intensity -= delta * 5.0
+		if camera_shake_intensity <= 0:
+			camera_shake_intensity = 0.0
+			camera.h_offset = 0.0
+			camera.v_offset = 0.0
 
 func _physics_process(delta):
 	# Block all processing during dialogue or death
