@@ -18,7 +18,7 @@
                 "outfit": "AnimatedVillager"
             },
             "position": {"x": 56, "y": 0, "z": -18},
-            "dialogue_opening": "Bienvenidos a Villa Esperanza. Tenemos posada."
+            "dialogue_opening": "Saludos, viajero. Si buscas descanso, ponte cómodo."
         },
         {
             "id": "npc_aldric",
