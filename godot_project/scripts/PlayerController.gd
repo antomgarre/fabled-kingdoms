@@ -560,8 +560,8 @@ func _spawn_combat_sparks(pos: Vector3):
 	sparks.global_position = pos
 	sparks.emitting = true
 	
-	var timer = get_tree().create_timer(1.0)
-	timer.timeout.connect(sparks.queue_free)
+	var cleanup_timer = get_tree().create_timer(1.0)
+	cleanup_timer.timeout.connect(sparks.queue_free)
 
 # === INPUT ===
 
