@@ -108,38 +108,86 @@
         {
             "id": "prop_stall_1",
             "type": "Stall_Empty",
-            "position": {
-                "x": 27,
-                "y": 10,
-                "z": -24
-            },
-            "rotation": {
-                "y": 1.57
-            }
+            "position": {"x": 27, "y": 0, "z": -24},
+            "rotation": {"y": 1.57}
         },
         {
             "id": "prop_barrel_1",
             "type": "Barrel",
-            "position": {
-                "x": 28,
-                "y": 10,
-                "z": -24
-            },
-            "rotation": {
-                "y": 0
-            }
+            "position": {"x": 28, "y": 0, "z": -24},
+            "rotation": {"y": 0}
         },
         {
             "id": "prop_barrel_2",
             "type": "Barrel",
-            "position": {
-                "x": 28.5,
-                "y": 10,
-                "z": -23.5
-            },
-            "rotation": {
-                "y": 0.5
-            }
+            "position": {"x": 28.5, "y": 0, "z": -23.5},
+            "rotation": {"y": 0.5}
+        },
+        {
+            "id": "prop_barrel_3",
+            "type": "Barrel",
+            "position": {"x": 20, "y": 0, "z": -23},
+            "rotation": {"y": 1.1}
+        },
+        {
+            "id": "prop_barrel_4",
+            "type": "Barrel",
+            "position": {"x": 22, "y": 0, "z": -25},
+            "rotation": {"y": 2.5}
+        },
+        {
+            "id": "prop_bench_1",
+            "type": "Bench",
+            "position": {"x": 25, "y": 0, "z": -20},
+            "rotation": {"y": 0}
+        },
+        {
+            "id": "prop_bench_2",
+            "type": "Bench",
+            "position": {"x": 21, "y": 0, "z": -21},
+            "rotation": {"y": 1.57}
+        },
+        {
+            "id": "prop_crate_1",
+            "type": "Crate_Wooden",
+            "position": {"x": 26, "y": 0, "z": -25},
+            "rotation": {"y": 0.1}
+        },
+        {
+            "id": "prop_crate_2",
+            "type": "Crate_Wooden",
+            "position": {"x": 26.5, "y": 0, "z": -25.2},
+            "rotation": {"y": 0.4}
+        },
+        {
+            "id": "prop_crate_3",
+            "type": "Crate_Wooden",
+            "position": {"x": 26.2, "y": 0.5, "z": -25.1},
+            "rotation": {"y": 0.2}
+        },
+        {
+            "id": "prop_rock_1",
+            "type": "Rock_Medium_1",
+            "position": {"x": 15, "y": 0, "z": -15},
+            "rotation": {"y": 1.2}
+        },
+        {
+            "id": "prop_rock_2",
+            "type": "Rock_Medium_2",
+            "position": {"x": 35, "y": 0, "z": -35},
+            "rotation": {"y": 2.2}
+        },
+        {
+            "id": "prop_path_1",
+            "type": "RockPath_Round_Wide",
+            "position": {"x": 25, "y": 0, "z": -15},
+            "rotation": {"y": 0.0}
+        },
+        {
+            "id": "prop_path_2",
+            "type": "RockPath_Round_Wide",
+            "position": {"x": 25, "y": 0, "z": -10},
+            "rotation": {"y": 0.2}
         },
         {
             "id": "prop_bench_1",

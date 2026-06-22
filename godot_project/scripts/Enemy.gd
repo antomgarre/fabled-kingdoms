@@ -56,13 +56,19 @@ var is_dead = false
 var health_bar: ProgressBar
 var health_bar_container: SubViewport
 var attack_dealt = false
+var impact_sounds: Array[AudioStream] = []
+var impact_audio_player: AudioStreamPlayer3D
 
 func take_damage(amount: float):
 	if is_dead: return
 	hp -= amount
 	
-	if hit_sound:
+	if hit_sound and hit_sound.stream:
 		hit_sound.play()
+	if impact_sounds.size() > 0:
+		impact_audio_player.stream = impact_sounds[randi() % impact_sounds.size()]
+		impact_audio_player.pitch_scale = randf_range(0.9, 1.1)
+		impact_audio_player.play()
 	
 	# Update floating health bar
 	if health_bar:
@@ -183,6 +189,13 @@ func _ready():
 	if ResourceLoader.exists("res://assets/sounds/voice-attack-grunt.mp3"):
 		aggro_sound.stream = load("res://assets/sounds/voice-attack-grunt.mp3")
 	add_child(aggro_sound)
+	
+	impact_audio_player = AudioStreamPlayer3D.new()
+	add_child(impact_audio_player)
+	for i in range(5):
+		var path = "res://assets/sounds/impactMetal_heavy_00" + str(i) + ".ogg"
+		if ResourceLoader.exists(path):
+			impact_sounds.append(load(path))
 	
 	# Floating health bar above the enemy
 	_create_health_bar()
@@ -432,13 +445,7 @@ func _check_aggro():
 		if current_state != State.CHASE and current_state != State.ATTACK:
 			if aggro_sound and not aggro_sound.playing:
 				aggro_sound.play()
-			# Notify MusicManager that combat has started
-			var mm = get_node_or_null("/root/Main/MusicManager")
-			if mm:
-				mm.set_combat_mode(true)
-			# Also reset the player's combat timer so music stays up while chasing
-			if target_player.has_method("_trigger_combat_music"):
-				target_player._trigger_combat_music()
+
 		current_state = State.CHASE
 		return
 

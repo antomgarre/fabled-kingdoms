@@ -63,11 +63,8 @@ var footsteps_dirt = []
 var attack_sounds = []
 var step_timer = 0.0
 
-# --- Music manager integration ---
-var _music_manager: Node = null
-const COMBAT_MUSIC_COOLDOWN := 5.0   # seconds of no-combat before switching back
-var _combat_music_timer := 0.0       # counts down; when <= 0 we go back to exploration
-var _in_combat_music := false        # tracks current music state
+# --- Background Music ---
+var _bg_music: AudioStreamPlayer
 
 # Camera shake
 var shake_amount = 0.0
@@ -145,26 +142,12 @@ func _ready():
 	
 	# Connect to dialogue signals
 	call_deferred("_connect_dialogue_signals")
-	# Cache MusicManager (deferred so the scene tree is fully built)
-	call_deferred("_cache_music_manager")
 
 func _connect_dialogue_signals():
 	var dialogue_ui = get_node_or_null("/root/Main/DialogueUI")
 	if dialogue_ui:
 		dialogue_ui.dialogue_opened.connect(func(): dialogue_active = true)
 		dialogue_ui.dialogue_closed.connect(func(): dialogue_active = false)
-
-func _cache_music_manager() -> void:
-	_music_manager = get_node_or_null("/root/Main/MusicManager")
-
-## Called whenever the player attacks or receives damage.
-## Switches music to combat and resets the 5-second quiet-period timer.
-func _trigger_combat_music() -> void:
-	_combat_music_timer = COMBAT_MUSIC_COOLDOWN
-	if not _in_combat_music:
-		_in_combat_music = true
-		if _music_manager:
-			_music_manager.set_combat_mode(true)
 
 
 ## Creates a CanvasLayer (layer 5) with four semi-transparent red edge panels
@@ -260,6 +243,13 @@ func show_damage_direction(attacker_global_pos: Vector3) -> void:
 	tween.tween_property(panel, "color", Color(1.0, 0.0, 0.0, 0.0), 0.8)
 
 func _setup_audio():
+	# Background music
+	_bg_music = AudioStreamPlayer.new()
+	_bg_music.stream = load("res://assets/sounds/music/background.mp3")
+	_bg_music.volume_db = -15.0
+	_bg_music.autoplay = true
+	add_child(_bg_music)
+	
 	# Attack sounds (varied for combo)
 	sfx_attack = AudioStreamPlayer.new()
 	add_child(sfx_attack)
@@ -493,7 +483,6 @@ func _attack():
 func _execute_attack():
 	is_attacking = true
 	attack_timer = ATTACK_DURATION
-	_trigger_combat_music()
 	
 	# Pick animation from cached map
 	var anim_name = ""
@@ -547,7 +536,6 @@ func take_damage(amount: float, attacker = null):
 	current_hp -= amount
 	current_hp = max(current_hp, 0)
 	camera_shake(0.2)
-	_trigger_combat_music()
 	
 	if sfx_hurt and sfx_hurt.stream:
 		sfx_hurt.play()
@@ -733,14 +721,6 @@ func _get_input_direction() -> Vector3:
 # === PHYSICS (MAIN GAME LOOP) ===
 
 func _process(delta):
-	# --- Combat music cooldown ---
-	if _in_combat_music:
-		_combat_music_timer -= delta
-		if _combat_music_timer <= 0.0:
-			_in_combat_music = false
-			if _music_manager:
-				_music_manager.set_combat_mode(false)
-
 	if camera_shake_intensity > 0:
 		camera.h_offset = randf_range(-camera_shake_intensity, camera_shake_intensity)
 		camera.v_offset = randf_range(-camera_shake_intensity, camera_shake_intensity)
