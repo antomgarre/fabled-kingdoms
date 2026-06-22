@@ -609,6 +609,18 @@
                 "damage": 10
             }
         },
+        {
+            "id": "goblin_8",
+            "type": "AnimatedKnight",
+            "position": {
+                "x": 10,
+                "y": 0,
+                "z": 40
+            },
+            "stats": {
+                "hp": 50,
+                "damage": 10
+            }
         },
         {
             "id": "npc_bandit_1",
