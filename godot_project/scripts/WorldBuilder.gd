@@ -219,9 +219,19 @@ func _spawn_prop(data: Dictionary):
 			var rot = data["rotation"]
 			prop.rotation = Vector3(0, rot["y"], 0)
 			
-		# Make sure they cast shadows
-		for child in prop.get_children():
-			if child is MeshInstance3D:
-				child.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+			if data.has("scale"):
+				var sc = data["scale"]
+				prop.scale = Vector3(sc, sc, sc)
+			
+			_setup_prop_meshes(prop)
 	else:
 		push_error("WorldBuilder: Missing prop model -> " + model_path)
+
+func _setup_prop_meshes(node: Node):
+	if node is MeshInstance3D:
+		node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+		# Generate static collision so players can't walk through houses/props
+		node.create_trimesh_collision()
+	
+	for child in node.get_children():
+		_setup_prop_meshes(child)

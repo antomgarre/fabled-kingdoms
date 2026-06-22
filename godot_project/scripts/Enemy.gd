@@ -228,7 +228,14 @@ func initialize(data: Dictionary):
 	if data.has("stats"):
 		hp = data["stats"].get("hp", 50.0)
 		
-	var type = data.get("type", "AnimatedEnemy")
+	if data.has("scale"):
+		var sc = data["scale"]
+		scale = Vector3(sc, sc, sc)
+		
+	var type = "AnimatedEnemy"
+	if data.has("visuals") and data["visuals"].has("base_body"):
+		type = data["visuals"]["base_body"]
+		
 	var model_path = "res://assets/models/" + type + ".gltf"
 	if not ResourceLoader.exists(model_path):
 		model_path = "res://assets/models/" + type + ".glb"

@@ -138,7 +138,11 @@ func _assemble_visuals(visuals: Dictionary):
 	
 	# The Mixamo FBX imports with mesh data at 1cm scale (0.01). 
 	# We need to scale it up 100x to make it human-sized (1 meter = 1 unit).
-	if base_name == "ladron_unido":
+	if npc_data.has("scale"):
+		var sc = npc_data["scale"]
+		base_model.scale = Vector3(sc, sc, sc)
+		print("  Scaled model by ", sc)
+	elif base_name == "ladron_unido":
 		base_model.scale = Vector3(200.0, 200.0, 200.0)
 		print("  Scaled ladron_unido up by 200x")
 	else:
