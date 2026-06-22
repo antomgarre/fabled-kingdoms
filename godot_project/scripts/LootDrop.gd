@@ -64,6 +64,7 @@ func _on_body_entered(body):
 		var tween = create_tween()
 		tween.tween_property(label, "global_position:y", label.global_position.y + 2.0, 1.5)
 		tween.parallel().tween_property(label, "modulate:a", 0.0, 1.5)
+		tween.parallel().tween_property(label, "outline_modulate:a", 0.0, 1.5)
 		tween.tween_callback(label.queue_free)
 		
 		# 3. Add progress

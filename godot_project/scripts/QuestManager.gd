@@ -11,8 +11,8 @@ func _ready():
 	# Initialize quest
 	quests["kill_goblins"] = {
 		"id": "kill_goblins",
-		"title": "Caza de Goblins",
-		"desc": "Elimina 3 goblins del bosque.",
+		"title": "Caza de Ladrones",
+		"desc": "Elimina 3 ladrones del bosque.",
 		"type": "kill_enemies",
 		"target": 3,
 		"progress": 0,

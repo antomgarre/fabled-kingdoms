@@ -1,7 +1,7 @@
 extends DirectionalLight3D
 
 @export var day_length_seconds: float = 600.0 # 10 minutes
-var time: float = 0.0
+var time: float = 15.0
 
 @onready var world_env: WorldEnvironment = $"../WorldEnvironment"
 
