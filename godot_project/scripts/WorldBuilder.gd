@@ -224,18 +224,16 @@ func _spawn_prop(data: Dictionary):
 		
 	else:
 		add_child(prop)
-			
-		if data.has("rotation"):
-			var rot = data["rotation"]
-			prop.rotation = Vector3(0, rot["y"], 0)
-			
-			if data.has("scale"):
-				var sc = data["scale"]
-				prop.scale = Vector3(sc, sc, sc)
-			
-			_setup_prop_meshes(prop)
-	else:
-		push_error("WorldBuilder: Missing prop model -> " + model_path)
+		
+	if data.has("rotation"):
+		var rot = data["rotation"]
+		prop.rotation = Vector3(0, rot["y"], 0)
+		
+	if data.has("scale"):
+		var sc = data["scale"]
+		prop.scale = Vector3(sc, sc, sc)
+	
+	_setup_prop_meshes(prop)
 
 func _setup_prop_meshes(node: Node):
 	if node is MeshInstance3D:
