@@ -8,12 +8,44 @@ const DAMAGE = 10.0
 
 var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
 
-enum State { IDLE, WANDER, CHASE, ATTACK, HURT }
-var current_state = State.IDLE
+enum State { IDLE, PATROL, ALERT, WANDER, CHASE, ATTACK, HURT }
+## Start in PATROL so the enemy is never just standing still at game start.
+var current_state = State.PATROL
 var target_player: Node3D = null
 var wander_target: Vector3 = Vector3.ZERO
 var state_timer = 0.0
 var hp = 50.0
+
+# ---------------------------------------------------------------------------
+# Patrol state
+# ---------------------------------------------------------------------------
+## Three waypoints generated around the spawn position at _ready().
+var patrol_points: Array[Vector3] = []
+## Index of the waypoint currently being walked toward.
+var patrol_index: int = 0
+## Countdown while the enemy stands still between waypoints.
+var patrol_wait_timer: float = 0.0
+
+# ---------------------------------------------------------------------------
+# Alert state
+# ---------------------------------------------------------------------------
+## Radius for sound-triggered alerts (player attack heard but not seen).
+const ALERT_SOUND_RANGE: float = 15.0
+## Total time spent in ALERT before returning to PATROL.
+const ALERT_DURATION: float = 4.0
+## How many seconds each 45-degree head-sweep takes.
+const ALERT_SWEEP_TIME: float = 1.0
+## Accumulated time inside ALERT.
+var alert_timer: float = 0.0
+## Used to drive the look-left / look-right oscillation.
+var alert_sweep_elapsed: float = 0.0
+## Baseline Y rotation captured when we first enter ALERT.
+var alert_base_yaw: float = 0.0
+
+# --- Hit Flash ---
+var _is_flashing: bool = false
+var _flash_mesh: MeshInstance3D = null
+var _original_material: Material = null
 
 @onready var pivot = $Pivot
 var animation_player: AnimationPlayer
@@ -46,12 +78,65 @@ func take_damage(amount: float):
 	tween.tween_property($Pivot, "scale", Vector3(1.2, 0.8, 1.2), 0.1)
 	tween.tween_property($Pivot, "scale", Vector3(1, 1, 1), 0.1)
 	
+	_flash_white()
+	
 	if hp <= 0:
 		_die()
 	else:
 		current_state = State.HURT
 		state_timer = 0.5
 		_play_anim("HitRecieve")
+
+## Recursively finds the first MeshInstance3D in the subtree.
+func _find_mesh_instance(node: Node) -> MeshInstance3D:
+	if node is MeshInstance3D:
+		return node
+	for child in node.get_children():
+		var result = _find_mesh_instance(child)
+		if result:
+			return result
+	return null
+
+## Briefly overrides all surface materials with a bright white emissive material,
+## then restores the originals after 80 ms. Skips if already flashing.
+func _flash_white() -> void:
+	if _is_flashing:
+		return
+	_is_flashing = true
+	
+	# Locate the mesh on first hit (cached for subsequent hits)
+	if _flash_mesh == null:
+		_flash_mesh = _find_mesh_instance(self)
+	if _flash_mesh == null:
+		_is_flashing = false
+		return
+	
+	# Store the original material from surface 0 (representative)
+	_original_material = _flash_mesh.get_surface_override_material(0)
+	
+	# Build the white hot emissive material
+	var white_mat = StandardMaterial3D.new()
+	white_mat.albedo_color = Color.WHITE
+	white_mat.emission_enabled = true
+	white_mat.emission = Color.WHITE
+	white_mat.emission_energy_multiplier = 2.0
+	white_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	
+	# Override every surface so skinned meshes with multiple materials flash fully
+	var surf_count = _flash_mesh.get_surface_override_material_count()
+	# Ensure count matches mesh surfaces
+	if _flash_mesh.mesh:
+		surf_count = max(surf_count, _flash_mesh.mesh.get_surface_count())
+	for i in range(surf_count):
+		_flash_mesh.set_surface_override_material(i, white_mat)
+	
+	# Wait 80 ms then restore
+	await get_tree().create_timer(0.08).timeout
+	
+	for i in range(surf_count):
+		_flash_mesh.set_surface_override_material(i, _original_material)
+	
+	_is_flashing = false
 
 func _die():
 	is_dead = true
@@ -101,7 +186,21 @@ func _ready():
 	
 	# Floating health bar above the enemy
 	_create_health_bar()
-					
+	
+	# --- Generate patrol waypoints around spawn position ---
+	# We keep Y at spawn height so the enemy doesn't try to walk into the air.
+	var spawn_pos: Vector3 = global_position
+	for i in 3:
+		var offset := Vector3(
+			randf_range(-8.0, 8.0),
+			0.0,
+			randf_range(-8.0, 8.0)
+		)
+		patrol_points.append(spawn_pos + offset)
+	# Shuffle so the order feels less predictable between instances.
+	patrol_points.shuffle()
+	patrol_index = 0
+	
 	# Find Player
 	var tree = get_tree()
 	if tree.has_group("player"):
@@ -149,6 +248,10 @@ func _physics_process(delta):
 	match current_state:
 		State.IDLE:
 			_process_idle(delta)
+		State.PATROL:
+			_process_patrol(delta)
+		State.ALERT:
+			_process_alert(delta)
 		State.WANDER:
 			_process_wander(delta)
 		State.CHASE:
@@ -181,6 +284,78 @@ func _process_idle(delta):
 		state_timer = randf_range(2.0, 5.0)
 		var rand_dir = Vector2(randf_range(-1, 1), randf_range(-1, 1)).normalized()
 		wander_target = global_position + Vector3(rand_dir.x, 0, rand_dir.y) * 5.0
+
+# ---------------------------------------------------------------------------
+# PATROL – walk a short circuit between pre-generated waypoints.
+# ---------------------------------------------------------------------------
+func _process_patrol(delta: float) -> void:
+	if patrol_points.is_empty():
+		# Safety: fall back to IDLE if waypoints weren't built yet.
+		current_state = State.IDLE
+		state_timer = 1.0
+		return
+
+	# --- Waiting at current waypoint ---
+	if patrol_wait_timer > 0.0:
+		patrol_wait_timer -= delta
+		velocity.x = move_toward(velocity.x, 0.0, SPEED)
+		velocity.z = move_toward(velocity.z, 0.0, SPEED)
+		_play_anim("Idle")
+		return
+
+	# --- Walking toward current waypoint ---
+	var dest: Vector3 = patrol_points[patrol_index]
+	var dist: float = global_position.distance_to(dest)
+
+	if dist < 1.5:
+		# Arrived – pause before moving on.
+		patrol_wait_timer = randf_range(1.5, 2.5)
+		patrol_index = (patrol_index + 1) % patrol_points.size()
+		return
+
+	var dir: Vector3 = global_position.direction_to(dest)
+	dir.y = 0.0
+	dir = dir.normalized()
+
+	# Patrol speed is 30 % of normal chase speed for a leisurely walk.
+	var patrol_speed: float = SPEED * 0.6
+	velocity.x = dir.x * patrol_speed
+	velocity.z = dir.z * patrol_speed
+	_rotate_towards(dir, delta)
+	_play_anim("Walk")
+
+# ---------------------------------------------------------------------------
+# ALERT – enemy stopped moving, performs two slow 45-degree head sweeps.
+# Transitions:
+#   • Player enters AGGRO_RANGE → CHASE  (handled in _check_aggro)
+#   • Timer expires              → PATROL
+# ---------------------------------------------------------------------------
+func _process_alert(delta: float) -> void:
+	# Stand still.
+	velocity.x = move_toward(velocity.x, 0.0, SPEED)
+	velocity.z = move_toward(velocity.z, 0.0, SPEED)
+	_play_anim("Idle")
+
+	alert_timer += delta
+	alert_sweep_elapsed += delta
+
+	# Oscillate ±45° (PI/4) around the baseline yaw.
+	# Full period = 2 × ALERT_SWEEP_TIME, so we use a sine wave.
+	var sweep_angle: float = deg_to_rad(45.0) * sin((alert_sweep_elapsed / ALERT_SWEEP_TIME) * PI)
+	pivot.rotation.y = alert_base_yaw + sweep_angle
+
+	if alert_timer >= ALERT_DURATION:
+		# Two full sweeps done – back to patrol.
+		current_state = State.PATROL
+		alert_timer = 0.0
+		alert_sweep_elapsed = 0.0
+
+# Helper: enter ALERT and capture the baseline facing direction.
+func _enter_alert() -> void:
+	current_state = State.ALERT
+	alert_timer = 0.0
+	alert_sweep_elapsed = 0.0
+	alert_base_yaw = pivot.rotation.y
 
 func _process_wander(delta):
 	var dir = global_position.direction_to(wander_target)
@@ -244,7 +419,7 @@ func _process_attack(delta):
 			var dist = global_position.distance_to(target_player.global_position)
 			if dist < ATTACK_RANGE * 1.5:
 				if target_player.has_method("take_damage"):
-					target_player.take_damage(DAMAGE)
+					target_player.take_damage(DAMAGE, self)
 		
 	state_timer -= delta
 	if state_timer <= 0:
@@ -253,11 +428,45 @@ func _process_attack(delta):
 
 func _check_aggro():
 	if not target_player: return
-	if global_position.distance_to(target_player.global_position) < AGGRO_RANGE:
+
+	var dist_to_player: float = global_position.distance_to(target_player.global_position)
+
+	# --- Direct sight detection (same as before) → CHASE ---
+	if dist_to_player < AGGRO_RANGE:
 		if current_state != State.CHASE and current_state != State.ATTACK:
 			if aggro_sound and not aggro_sound.playing:
 				aggro_sound.play()
 		current_state = State.CHASE
+		return
+
+	# --- Sound detection: player is attacking nearby but NOT in direct line of sight → ALERT ---
+	# We check if the player has just attacked by reading a flag exposed on the player node.
+	# The flag is optional – we degrade gracefully if it doesn't exist.
+	var player_is_attacking: bool = false
+	if target_player.has_method("is_attacking"):
+		player_is_attacking = target_player.is_attacking()
+	elif "is_attacking" in target_player:
+		player_is_attacking = target_player.is_attacking
+
+	if player_is_attacking and dist_to_player < ALERT_SOUND_RANGE:
+		# Dot-product sight check: if the player is broadly in front of the
+		# enemy (dot > 0.5, roughly ±60°) we consider them visible and jump
+		# straight to CHASE instead of ALERT.
+		var to_player: Vector3 = global_position.direction_to(target_player.global_position)
+		to_player.y = 0.0
+		var facing: Vector3 = -pivot.global_transform.basis.z  # forward vector
+		facing.y = 0.0
+		var dot: float = facing.normalized().dot(to_player.normalized())
+		if dot > 0.5:
+			# Visible – escalate directly to chase.
+			if current_state != State.CHASE and current_state != State.ATTACK:
+				if aggro_sound and not aggro_sound.playing:
+					aggro_sound.play()
+			current_state = State.CHASE
+		else:
+			# Heard but not seen – trigger ALERT (only if not already alert/chasing).
+			if current_state == State.PATROL or current_state == State.IDLE or current_state == State.WANDER:
+				_enter_alert()
 
 func _rotate_towards(dir: Vector3, delta: float):
 	if dir.length_squared() > 0.001:

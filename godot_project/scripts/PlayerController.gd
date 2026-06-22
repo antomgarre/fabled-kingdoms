@@ -67,6 +67,13 @@ var step_timer = 0.0
 var shake_amount = 0.0
 var shake_decay = 8.0
 
+# --- Damage Direction Indicator ---
+var _dmg_canvas: CanvasLayer = null
+var _dmg_top: ColorRect = null
+var _dmg_bottom: ColorRect = null
+var _dmg_left: ColorRect = null
+var _dmg_right: ColorRect = null
+
 # Animation map (resolved at load time)
 var anim_map = {}
 var footstep_particles: GPUParticles3D
@@ -128,6 +135,7 @@ func _ready():
 	_setup_audio()
 	_setup_character()
 	_setup_particles()
+	_setup_damage_indicator()
 	
 	# Connect to dialogue signals
 	call_deferred("_connect_dialogue_signals")
@@ -137,6 +145,98 @@ func _connect_dialogue_signals():
 	if dialogue_ui:
 		dialogue_ui.dialogue_opened.connect(func(): dialogue_active = true)
 		dialogue_ui.dialogue_closed.connect(func(): dialogue_active = false)
+
+## Creates a CanvasLayer (layer 5) with four semi-transparent red edge panels
+## used to communicate the direction an attack came from.
+func _setup_damage_indicator() -> void:
+	_dmg_canvas = CanvasLayer.new()
+	_dmg_canvas.layer = 5
+	add_child(_dmg_canvas)
+	
+	var vp_size = get_viewport().get_visible_rect().size
+	var edge_thick = 60.0  # px
+	var base_color = Color(1.0, 0.0, 0.0, 0.0)  # start fully transparent
+	
+	# Top strip
+	_dmg_top = ColorRect.new()
+	_dmg_top.color = base_color
+	_dmg_top.size = Vector2(vp_size.x, edge_thick)
+	_dmg_top.position = Vector2.ZERO
+	_dmg_top.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_dmg_canvas.add_child(_dmg_top)
+	
+	# Bottom strip
+	_dmg_bottom = ColorRect.new()
+	_dmg_bottom.color = base_color
+	_dmg_bottom.size = Vector2(vp_size.x, edge_thick)
+	_dmg_bottom.position = Vector2(0.0, vp_size.y - edge_thick)
+	_dmg_bottom.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_dmg_canvas.add_child(_dmg_bottom)
+	
+	# Left strip
+	_dmg_left = ColorRect.new()
+	_dmg_left.color = base_color
+	_dmg_left.size = Vector2(edge_thick, vp_size.y)
+	_dmg_left.position = Vector2.ZERO
+	_dmg_left.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_dmg_canvas.add_child(_dmg_left)
+	
+	# Right strip
+	_dmg_right = ColorRect.new()
+	_dmg_right.color = base_color
+	_dmg_right.size = Vector2(edge_thick, vp_size.y)
+	_dmg_right.position = Vector2(vp_size.x - edge_thick, 0.0)
+	_dmg_right.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_dmg_canvas.add_child(_dmg_right)
+
+## Determines which screen edge the attacker is on (in camera-relative space)
+## and pulses that panel from alpha 0.6 → 0.0 over 0.8 seconds.
+func show_damage_direction(attacker_global_pos: Vector3) -> void:
+	if _dmg_canvas == null:
+		return
+	
+	# World-space direction from player → attacker, flattened to XZ plane
+	var to_attacker = attacker_global_pos - global_position
+	to_attacker.y = 0.0
+	if to_attacker.length_squared() < 0.001:
+		return
+	to_attacker = to_attacker.normalized()
+	
+	# Camera forward on XZ plane (spring_arm looks where the camera faces)
+	var cam_fwd = -spring_arm.global_transform.basis.z
+	cam_fwd.y = 0.0
+	if cam_fwd.length_squared() < 0.001:
+		cam_fwd = Vector3(0, 0, -1)
+	else:
+		cam_fwd = cam_fwd.normalized()
+	
+	var cam_right = spring_arm.global_transform.basis.x
+	cam_right.y = 0.0
+	cam_right = cam_right.normalized()
+	
+	# Project attacker direction onto camera axes to get a 2-D screen-space angle
+	var dot_fwd   = to_attacker.dot(cam_fwd)    # +1 = ahead,  -1 = behind
+	var dot_right = to_attacker.dot(cam_right)  # +1 = right,  -1 = left
+	var angle_deg = rad_to_deg(atan2(dot_right, dot_fwd))  # 0° = front, 90° = right
+	
+	# Determine which quadrant the hit came from and pick the panel
+	var panel: ColorRect = null
+	if angle_deg >= -45.0 and angle_deg < 45.0:
+		panel = _dmg_top      # attacker is in front → top flash
+	elif angle_deg >= 45.0 and angle_deg < 135.0:
+		panel = _dmg_right    # attacker is to the right
+	elif angle_deg >= -135.0 and angle_deg < -45.0:
+		panel = _dmg_left     # attacker is to the left
+	else:
+		panel = _dmg_bottom   # attacker is behind → bottom flash
+	
+	if panel == null:
+		return
+	
+	# Snap the panel to peak alpha, then tween to transparent
+	panel.color = Color(1.0, 0.0, 0.0, 0.6)
+	var tween = create_tween()
+	tween.tween_property(panel, "color", Color(1.0, 0.0, 0.0, 0.0), 0.8)
 
 func _setup_audio():
 	# Attack sounds (varied for combo)
@@ -418,7 +518,7 @@ func _dodge():
 	if "roll" in anim_map:
 		animation_player.play(anim_map["roll"])
 
-func take_damage(amount: float):
+func take_damage(amount: float, attacker = null):
 	if is_dead:
 		return
 	
@@ -428,6 +528,10 @@ func take_damage(amount: float):
 	
 	if sfx_hurt and sfx_hurt.stream:
 		sfx_hurt.play()
+	
+	# Show directional damage indicator when attacker is known
+	if attacker != null and attacker is Node3D:
+		show_damage_direction(attacker.global_position)
 	
 	# Update HUD
 	var hud = get_node_or_null("/root/Main/HUD")
