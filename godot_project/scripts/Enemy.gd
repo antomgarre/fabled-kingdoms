@@ -166,6 +166,29 @@ func _die():
 		get_tree().current_scene.add_child(area)
 		area.global_position = global_position + Vector3(0, 1, 0)
 	
+	# Spawn Death Decal (Blood stain / Scorch mark)
+	var decal_mesh = MeshInstance3D.new()
+	var plane = PlaneMesh.new()
+	plane.size = Vector2(2.5, 2.5)
+	
+	var mat = StandardMaterial3D.new()
+	mat.albedo_color = Color(0.25, 0.02, 0.02, 0.7) # Dark red blood/scorch
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.albedo_texture = load("res://assets/models/Bark_DeadTree.png") # Reuse noise texture for organic look
+	mat.uv1_scale = Vector3(3, 3, 3)
+	plane.material = mat
+	decal_mesh.mesh = plane
+	
+	get_tree().current_scene.add_child(decal_mesh)
+	decal_mesh.global_position = global_position + Vector3(0, 0.05, 0)
+	decal_mesh.rotation.y = randf_range(0, PI * 2.0)
+	
+	# Optional: make it fade out after a long time
+	var d_tween = decal_mesh.create_tween()
+	d_tween.tween_interval(10.0)
+	d_tween.tween_property(mat, "albedo_color:a", 0.0, 5.0)
+	d_tween.tween_callback(decal_mesh.queue_free)
+	
 	await get_tree().create_timer(2.0).timeout
 	var tween = create_tween()
 	tween.tween_property(self, "position:y", position.y - 2.0, 2.0)

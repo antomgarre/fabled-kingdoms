@@ -64,8 +64,8 @@ func _setup_interaction_zone():
 	# Floating "Pulsa E" indicator above head
 	interaction_indicator = Label3D.new()
 	interaction_indicator.name = "InteractionIndicator"
-	interaction_indicator.text = "[ E ] Hablar"
-	interaction_indicator.font_size = 32
+	interaction_indicator.text = "\"" + dialogue_opening + "\"\n[ E ] Hablar"
+	interaction_indicator.font_size = 24
 	interaction_indicator.outline_size = 6
 	interaction_indicator.modulate = Color(0.79, 0.66, 0.43, 1.0)
 	interaction_indicator.outline_modulate = Color(0, 0, 0, 0.9)
