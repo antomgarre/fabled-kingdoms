@@ -251,6 +251,8 @@ func initialize(data: Dictionary):
 		var model = load(model_path).instantiate()
 		pivot.add_child(model)
 		
+		_equip_weapon(model)
+		
 		animation_player = _find_animation_player(model)
 		if animation_player:
 			for anim_name in animation_player.get_animation_list():
@@ -259,6 +261,36 @@ func initialize(data: Dictionary):
 					var anim = animation_player.get_animation(anim_name)
 					if anim:
 						anim.loop_mode = Animation.LOOP_LINEAR
+
+func _find_skeleton(node: Node) -> Skeleton3D:
+	if node is Skeleton3D: return node
+	for child in node.get_children():
+		var result = _find_skeleton(child)
+		if result: return result
+	return null
+
+func _equip_weapon(model: Node3D):
+	var skeleton = _find_skeleton(model)
+	if skeleton:
+		var bone_name = "Hand_R"
+		var bone_idx = skeleton.find_bone(bone_name)
+		if bone_idx == -1: bone_idx = skeleton.find_bone("mixamorig_RightHand")
+		if bone_idx == -1: bone_idx = skeleton.find_bone("RightHand")
+		if bone_idx == -1: bone_idx = skeleton.find_bone("Character1_RightHand")
+		
+		if bone_idx != -1:
+			var attachment = BoneAttachment3D.new()
+			attachment.bone_name = skeleton.get_bone_name(bone_idx)
+			skeleton.add_child(attachment)
+			
+			var sword_mesh = load("res://assets/models/Sword.obj")
+			if sword_mesh:
+				var mesh_inst = MeshInstance3D.new()
+				mesh_inst.mesh = sword_mesh
+				# Scale down and rotate so it fits in the hand properly
+				mesh_inst.scale = Vector3(0.6, 0.6, 0.6)
+				mesh_inst.rotation_degrees = Vector3(90, 0, 0)
+				attachment.add_child(mesh_inst)
 
 func _physics_process(delta):
 	if is_dead:

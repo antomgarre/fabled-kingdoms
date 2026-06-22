@@ -59,32 +59,6 @@
             "position": {"x": 15, "y": 0, "z": -15},
             "dialogue_opening": "Mantente alerta, los ladrones andan cerca."
         },
-        {
-            "id": "npc_bandit_1",
-            "name": "Ladrón del Bosque",
-            "role": "ENEMY",
-            "backstory": "Asalta a los viajeros despistados.",
-            "stats": {"health": 100, "speed": 4, "aggressiveness": 0.85},
-            "visuals": {
-                "base_body": "AnimatedEnemy",
-                "outfit": "AnimatedEnemy"
-            },
-            "position": {"x": 40, "y": 0, "z": -35},
-            "dialogue_opening": "¡Tu oro o tu vida!"
-        },
-        {
-            "id": "npc_boss_1",
-            "name": "El Campeón Corrompido",
-            "role": "ENEMY",
-            "backstory": "Antiguo héroe consumido por la oscuridad del bosque.",
-            "stats": {"health": 400, "speed": 5, "aggressiveness": 1.0},
-            "visuals": {
-                "base_body": "AnimatedEnemy",
-                "outfit": "AnimatedEnemy"
-            },
-            "position": {"x": 30, "y": 0, "z": -60},
-            "scale": 1.5,
-            "dialogue_opening": "¡GRAAAAAAAARRRRGGGHH!"
         }
     ],
     "environment_props": [
@@ -635,18 +609,19 @@
                 "damage": 10
             }
         },
+        },
         {
-            "id": "goblin_8",
-            "type": "AnimatedKnight",
-            "position": {
-                "x": 10,
-                "y": 0,
-                "z": 40
-            },
-            "stats": {
-                "hp": 50,
-                "damage": 10
-            }
+            "id": "npc_bandit_1",
+            "type": "AnimatedEnemy",
+            "position": {"x": 40, "y": 0, "z": -35},
+            "stats": {"hp": 100, "damage": 15, "speed": 4}
+        },
+        {
+            "id": "npc_boss_1",
+            "type": "AnimatedEnemy",
+            "position": {"x": 30, "y": 0, "z": -60},
+            "scale": 1.2,
+            "stats": {"hp": 400, "damage": 25, "speed": 5}
         }
     ],
     "terrain": {
