@@ -479,15 +479,17 @@ func _setup_particles():
 	footstep_particles.emitting = false
 	
 	var dust_mat = StandardMaterial3D.new()
-	dust_mat.albedo_color = Color(0.4, 0.3, 0.2, 0.6)
+	dust_mat.albedo_color = Color(0.45, 0.35, 0.25, 0.5)
 	dust_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	dust_mat.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
 	dust_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	
-	var quad = QuadMesh.new()
-	quad.size = Vector2(0.3, 0.3)
-	quad.material = dust_mat
-	footstep_particles.draw_pass_1 = quad
+	var dust_mesh = SphereMesh.new()
+	dust_mesh.radius = 0.05
+	dust_mesh.height = 0.1
+	dust_mesh.radial_segments = 8
+	dust_mesh.rings = 4
+	dust_mesh.material = dust_mat
+	footstep_particles.draw_pass_1 = dust_mesh
 	
 	var dust_proc = ParticleProcessMaterial.new()
 	dust_proc.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_BOX
@@ -496,7 +498,7 @@ func _setup_particles():
 	dust_proc.spread = 30.0
 	dust_proc.initial_velocity_min = 0.5
 	dust_proc.initial_velocity_max = 1.0
-	dust_proc.gravity = Vector3(0, 0, 0)
+	dust_proc.gravity = Vector3(0, -0.5, 0)
 	
 	var curve = Curve.new()
 	curve.add_point(Vector2(0, 1))
@@ -518,18 +520,18 @@ func _spawn_combat_sparks(pos: Vector3):
 	sparks.explosiveness = 0.9
 	
 	var mat = StandardMaterial3D.new()
-	mat.albedo_color = Color(1.0, 0.7, 0.2)
+	mat.albedo_color = Color(1.0, 0.8, 0.2)
 	mat.emission_enabled = true
-	mat.emission = Color(1.0, 0.5, 0.1)
-	mat.emission_energy_multiplier = 2.0
-	mat.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
+	mat.emission = Color(1.0, 0.6, 0.1)
+	mat.emission_energy_multiplier = 4.0
 	
-	var mesh = QuadMesh.new()
-	mesh.size = Vector2(0.15, 0.15)
+	var mesh = BoxMesh.new()
+	mesh.size = Vector3(0.02, 0.2, 0.02)
 	mesh.material = mat
 	sparks.draw_pass_1 = mesh
 	
 	var proc = ParticleProcessMaterial.new()
+	proc.particle_flag_align_y = true
 	proc.direction = Vector3(0, 1, 0)
 	proc.spread = 180.0
 	proc.initial_velocity_min = 2.0
