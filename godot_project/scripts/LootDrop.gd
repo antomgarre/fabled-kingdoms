@@ -61,7 +61,7 @@ func _on_body_entered(body):
 		label.global_position = global_position + Vector3(0, 1, 0)
 		get_tree().current_scene.add_child(label)
 		
-		var tween = create_tween()
+		var tween = label.create_tween()
 		tween.tween_property(label, "global_position:y", label.global_position.y + 2.0, 1.5)
 		tween.parallel().tween_property(label, "modulate:a", 0.0, 1.5)
 		tween.parallel().tween_property(label, "outline_modulate:a", 0.0, 1.5)

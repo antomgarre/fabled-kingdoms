@@ -46,7 +46,7 @@ func _ready():
 	wind_player = AudioStreamPlayer.new()
 	wind_player.stream = wind_stream
 	wind_player.bus = "WindBus"
-	wind_player.volume_db = -10.0
+	wind_player.volume_db = -35.0
 	add_child(wind_player)
 	wind_player.play()
 	
@@ -56,8 +56,8 @@ func _ready():
 	# Position near the water level in the center
 	water_player.position = Vector3(0, -0.6, 0)
 	water_player.unit_size = 5.0
-	water_player.max_distance = 30.0
-	water_player.volume_db = -5.0
+	water_player.max_distance = 15.0
+	water_player.volume_db = -25.0
 	add_child(water_player)
 	water_player.play()
 
@@ -81,7 +81,7 @@ func _create_noise_stream() -> AudioStreamWAV:
 	for i in range(total_samples):
 		var noise = randi() % 65536 - 32768
 		# Simple 1-pole lowpass to avoid harsh highs before bus effects
-		var val = int(lerp(float(last_val), float(noise), 0.5))
+		var val = int(lerp(float(last_val), float(noise), 0.1))
 		last_val = val
 		
 		# 16-bit little endian
