@@ -22,7 +22,7 @@ const toCopy = [
     // Medieval Village
     {
         dir: 'downloads/Medieval Village MegaKit[Standard]/glTF',
-        files: ['Prop_Wagon.gltf', 'Prop_Wagon.bin', 'Prop_WoodenFence_Single.gltf', 'Prop_WoodenFence_Single.bin', 'T_WoodTrim_BaseColor.png', 'T_WoodTrim_Normal.png', 'T_WoodTrim_Roughness.png', 'Wall_Plaster_Straight.gltf', 'Wall_Plaster_Straight.bin', 'Wall_Plaster_Door_Flat.gltf', 'Wall_Plaster_Door_Flat.bin', 'Door_1_Flat.gltf', 'Door_1_Flat.bin', 'Floor_WoodDark.gltf', 'Floor_WoodDark.bin', 'Roof_Wooden_2x1.gltf', 'Roof_Wooden_2x1.bin', 'T_Plaster_BaseColor.png', 'T_Plaster_Normal.png', 'T_Plaster_ORM.png']
+        files: ['Prop_Wagon.gltf', 'Prop_Wagon.bin', 'Prop_WoodenFence_Single.gltf', 'Prop_WoodenFence_Single.bin', 'T_WoodTrim_BaseColor.png', 'T_WoodTrim_Normal.png', 'T_WoodTrim_Roughness.png', 'Wall_Plaster_Straight.gltf', 'Wall_Plaster_Straight.bin', 'Wall_Plaster_Door_Flat.gltf', 'Wall_Plaster_Door_Flat.bin', 'Door_1_Flat.gltf', 'Door_1_Flat.bin', 'Floor_WoodDark.gltf', 'Floor_WoodDark.bin', 'Roof_Wooden_2x1.gltf', 'Roof_Wooden_2x1.bin', 'T_Plaster_BaseColor.png', 'T_Plaster_Normal.png', 'T_Plaster_ORM.png', 'Roof_RoundTiles_4x4.gltf', 'Roof_RoundTiles_4x4.bin', 'Wall_Plaster_Window_Wide_Flat.gltf', 'Wall_Plaster_Window_Wide_Flat.bin', 'T_RoundTiles_BaseColor.png', 'T_RoundTiles_Normal.png', 'T_RoundTiles_Roughness.png']
     },
     // Weapons
     {
