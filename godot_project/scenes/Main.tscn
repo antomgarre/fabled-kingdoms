@@ -1,4 +1,4 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/Player.tscn" id="1_player"]
 [ext_resource type="Script" path="res://scripts/WorldBuilder.gd" id="2_world"]
@@ -11,6 +11,7 @@
 [ext_resource type="Script" path="res://scripts/AmbientAudio.gd" id="9_ambient"]
 [ext_resource type="Script" path="res://scripts/DayNightCycle.gd" id="10_daynight"]
 [ext_resource type="Script" path="res://scripts/QuestManager.gd" id="11_quest"]
+[ext_resource type="Script" path="res://scripts/MusicManager.gd" id="12_music"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_sky"]
 sky_top_color = Color(0.18, 0.32, 0.54, 1)
@@ -102,3 +103,6 @@ script = ExtResource("9_ambient")
 
 [node name="QuestManager" type="Node" parent="."]
 script = ExtResource("11_quest")
+
+[node name="MusicManager" type="Node" parent="."]
+script = ExtResource("12_music")

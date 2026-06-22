@@ -428,20 +428,24 @@ func _process_attack(delta):
 
 func _check_aggro():
 	if not target_player: return
-
-	var dist_to_player: float = global_position.distance_to(target_player.global_position)
-
-	# --- Direct sight detection (same as before) → CHASE ---
-	if dist_to_player < AGGRO_RANGE:
+	if global_position.distance_to(target_player.global_position) < AGGRO_RANGE:
 		if current_state != State.CHASE and current_state != State.ATTACK:
 			if aggro_sound and not aggro_sound.playing:
 				aggro_sound.play()
+			# Notify MusicManager that combat has started
+			var mm = get_node_or_null("/root/Main/MusicManager")
+			if mm:
+				mm.set_combat_mode(true)
+			# Also reset the player's combat timer so music stays up while chasing
+			if target_player.has_method("_trigger_combat_music"):
+				target_player._trigger_combat_music()
 		current_state = State.CHASE
 		return
 
 	# --- Sound detection: player is attacking nearby but NOT in direct line of sight → ALERT ---
 	# We check if the player has just attacked by reading a flag exposed on the player node.
 	# The flag is optional – we degrade gracefully if it doesn't exist.
+	var dist_to_player: float = global_position.distance_to(target_player.global_position)
 	var player_is_attacking: bool = false
 	if target_player.has_method("is_attacking"):
 		player_is_attacking = target_player.is_attacking()
