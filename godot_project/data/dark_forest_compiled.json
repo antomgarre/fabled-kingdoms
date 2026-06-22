@@ -248,6 +248,213 @@
             "rotation": {
                 "y": 0
             }
+        },
+        {
+            "id": "prop_stall_2",
+            "type": "Stall_Empty",
+            "position": {
+                "x": 24,
+                "y": 0,
+                "z": -26
+            },
+            "rotation": {
+                "y": 0.78
+            }
+        },
+        {
+            "id": "prop_stall_3",
+            "type": "Stall_Empty",
+            "position": {
+                "x": 26,
+                "y": 0,
+                "z": -22
+            },
+            "rotation": {
+                "y": -0.78
+            }
+        },
+        {
+            "id": "prop_barrel_3",
+            "type": "Barrel",
+            "position": {
+                "x": 24.5,
+                "y": 0,
+                "z": -26
+            },
+            "rotation": {
+                "y": 0
+            }
+        },
+        {
+            "id": "prop_barrel_4",
+            "type": "Barrel",
+            "position": {
+                "x": 25,
+                "y": 0,
+                "z": -25.5
+            },
+            "rotation": {
+                "y": 0
+            }
+        },
+        {
+            "id": "prop_barrel_5",
+            "type": "Barrel",
+            "position": {
+                "x": 25.5,
+                "y": 0,
+                "z": -25
+            },
+            "rotation": {
+                "y": 0
+            }
+        },
+        {
+            "id": "prop_crate_2",
+            "type": "Crate_Wooden",
+            "position": {
+                "x": 26,
+                "y": 0,
+                "z": -26
+            },
+            "rotation": {
+                "y": 0.1
+            }
+        },
+        {
+            "id": "prop_crate_3",
+            "type": "Crate_Wooden",
+            "position": {
+                "x": 26.5,
+                "y": 0,
+                "z": -25.5
+            },
+            "rotation": {
+                "y": 0.2
+            }
+        },
+        {
+            "id": "prop_crate_4",
+            "type": "Crate_Wooden",
+            "position": {
+                "x": 27,
+                "y": 0,
+                "z": -25
+            },
+            "rotation": {
+                "y": 0.3
+            }
+        },
+        {
+            "id": "tree_pine_3",
+            "type": "Pine_1",
+            "position": {
+                "x": 42,
+                "y": 0,
+                "z": 41
+            },
+            "rotation": {
+                "y": 0.5
+            }
+        },
+        {
+            "id": "tree_pine_4",
+            "type": "Pine_2",
+            "position": {
+                "x": 44,
+                "y": 0,
+                "z": 45
+            },
+            "rotation": {
+                "y": 1.2
+            }
+        },
+        {
+            "id": "tree_common_3",
+            "type": "CommonTree_1",
+            "position": {
+                "x": 47,
+                "y": 0,
+                "z": 43
+            },
+            "rotation": {
+                "y": 2.1
+            }
+        },
+        {
+            "id": "tree_common_4",
+            "type": "CommonTree_2",
+            "position": {
+                "x": 49,
+                "y": 0,
+                "z": 48
+            },
+            "rotation": {
+                "y": 0.8
+            }
+        },
+        {
+            "id": "tree_pine_5",
+            "type": "Pine_1",
+            "position": {
+                "x": 45,
+                "y": 0,
+                "z": 49
+            },
+            "rotation": {
+                "y": 3.1
+            }
+        },
+        {
+            "id": "tree_pine_6",
+            "type": "Pine_2",
+            "position": {
+                "x": 41,
+                "y": 0,
+                "z": 47
+            },
+            "rotation": {
+                "y": -0.5
+            }
+        },
+        {
+            "id": "rock_large_1",
+            "type": "Rock_Medium_1",
+            "position": {
+                "x": 55,
+                "y": 0,
+                "z": 55
+            },
+            "rotation": {
+                "y": 1.0
+            },
+            "scale": 3.0
+        },
+        {
+            "id": "rock_large_2",
+            "type": "Rock_Medium_2",
+            "position": {
+                "x": 60,
+                "y": 0,
+                "z": 45
+            },
+            "rotation": {
+                "y": 2.5
+            },
+            "scale": 3.0
+        },
+        {
+            "id": "rock_large_3",
+            "type": "Rock_Medium_1",
+            "position": {
+                "x": 35,
+                "y": 0,
+                "z": 50
+            },
+            "rotation": {
+                "y": 0.0
+            },
+            "scale": 3.0
         }
     ],
     "enemies": [
@@ -271,6 +478,84 @@
                 "x": 50,
                 "y": 10,
                 "z": -45
+            },
+            "stats": {
+                "hp": 50,
+                "damage": 10
+            }
+        },
+        {
+            "id": "goblin_3",
+            "type": "AnimatedEnemy",
+            "position": {
+                "x": 15,
+                "y": 0,
+                "z": 20
+            },
+            "stats": {
+                "hp": 50,
+                "damage": 10
+            }
+        },
+        {
+            "id": "goblin_4",
+            "type": "AnimatedKnight",
+            "position": {
+                "x": 30,
+                "y": 0,
+                "z": 15
+            },
+            "stats": {
+                "hp": 50,
+                "damage": 10
+            }
+        },
+        {
+            "id": "goblin_5",
+            "type": "AnimatedEnemy",
+            "position": {
+                "x": 45,
+                "y": 0,
+                "z": 30
+            },
+            "stats": {
+                "hp": 50,
+                "damage": 10
+            }
+        },
+        {
+            "id": "goblin_6",
+            "type": "AnimatedKnight",
+            "position": {
+                "x": 60,
+                "y": 0,
+                "z": 50
+            },
+            "stats": {
+                "hp": 50,
+                "damage": 10
+            }
+        },
+        {
+            "id": "goblin_7",
+            "type": "AnimatedEnemy",
+            "position": {
+                "x": 20,
+                "y": 0,
+                "z": 55
+            },
+            "stats": {
+                "hp": 50,
+                "damage": 10
+            }
+        },
+        {
+            "id": "goblin_8",
+            "type": "AnimatedKnight",
+            "position": {
+                "x": 10,
+                "y": 0,
+                "z": 40
             },
             "stats": {
                 "hp": 50,

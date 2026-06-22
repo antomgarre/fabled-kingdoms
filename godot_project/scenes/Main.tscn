@@ -10,6 +10,7 @@
 [ext_resource type="PackedScene" path="res://scenes/DeathScreen.tscn" id="8_death"]
 [ext_resource type="Script" path="res://scripts/AmbientAudio.gd" id="9_ambient"]
 [ext_resource type="Script" path="res://scripts/DayNightCycle.gd" id="10_daynight"]
+[ext_resource type="Script" path="res://scripts/QuestManager.gd" id="11_quest"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_sky"]
 sky_top_color = Color(0.18, 0.32, 0.54, 1)
@@ -95,3 +96,5 @@ script = ExtResource("2_world")
 [node name="AmbientAudio" type="Node" parent="."]
 script = ExtResource("9_ambient")
 
+[node name="QuestManager" type="Node" parent="."]
+script = ExtResource("11_quest")

@@ -68,6 +68,13 @@ func _die():
 	if death_sound and not death_sound.playing:
 		death_sound.play()
 	
+	var loot_script = load("res://scripts/LootDrop.gd")
+	if loot_script:
+		var area = Area3D.new()
+		area.set_script(loot_script)
+		get_tree().current_scene.add_child(area)
+		area.global_position = global_position + Vector3(0, 1, 0)
+	
 	await get_tree().create_timer(2.0).timeout
 	var tween = create_tween()
 	tween.tween_property(self, "position:y", position.y - 2.0, 2.0)
