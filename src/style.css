@@ -291,6 +291,22 @@ footer {
   margin-top: auto;
 }
 
+.author-credits {
+  margin-top: 0.5rem;
+}
+
+.author-credits a {
+  color: var(--color-gold);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+.author-credits a:hover {
+  color: var(--color-gold-bright);
+  text-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+}
+
 /* --- Responsive --- */
 @media (max-width: 768px) {
   .title-glow { font-size: 3rem; }
