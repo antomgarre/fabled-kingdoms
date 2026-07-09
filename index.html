@@ -3,32 +3,72 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Fabled Kingdoms</title>
+  <title>Fabled Kingdoms | Multiplayer Fantasy RPG</title>
+  
+  <!-- Modern Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="/src/style.css">
 </head>
 <body>
-  <div id="error-log" style="position: absolute; top: 0; left: 0; z-index: 9999; color: red; background: rgba(255,255,255,0.9); padding: 10px; font-family: monospace; pointer-events: none;"></div>
-  <script>
-    const errorLog = document.getElementById('error-log');
-    window.addEventListener('error', function(e) {
-      errorLog.innerText += 'Error: ' + e.message + '\n';
-    });
-    window.addEventListener('unhandledrejection', function(e) {
-      errorLog.innerText += 'Promise: ' + e.reason + '\n';
-    });
-    const oldLog = console.log;
-    console.log = function(...args) {
-      errorLog.innerText += args.join(' ') + '\n';
-      oldLog.apply(console, args);
-    };
-    const oldErr = console.error;
-    console.error = function(...args) {
-      errorLog.innerText += 'ERR: ' + args.join(' ') + '\n';
-      oldErr.apply(console, args);
-    };
-  </script>
-  <div id="app"></div>
+  
+  <!-- Ambient background layer -->
+  <div class="hero-background"></div>
+  <div class="vignette-overlay"></div>
+  
+  <!-- Main content wrapper -->
+  <main class="container">
+    
+    <header class="navbar">
+      <div class="logo">Fabled Kingdoms</div>
+      <nav>
+        <a href="#features">Features</a>
+        <a href="#multiplayer">Multiplayer</a>
+        <a href="#download" class="nav-cta">Download Now</a>
+      </nav>
+    </header>
+
+    <section class="hero">
+      <div class="hero-content">
+        <h1 class="title-glow">Fabled Kingdoms</h1>
+        <p class="subtitle">A Procedural Dark Fantasy RPG built with Godot 4.</p>
+        <p class="description">
+          Explore endless procedurally generated dark forests, battle fearsome enemies, and team up with friends anywhere in the world using native Steam P2P multiplayer. No servers required.
+        </p>
+        
+        <div class="cta-container">
+          <a href="downloads/Fabled_Kingdoms_Win64.zip" class="btn-primary" download>
+            <span class="btn-icon">⬇</span> Download for Windows
+          </a>
+          <span class="version-info">Version 0.1 Alpha • 45 MB</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="features" class="features-grid">
+      <div class="feature-card glass">
+        <h3>🌍 Procedural Worlds</h3>
+        <p>Every playthrough generates a unique dark forest with dynamic terrain, rivers, and mysterious towns.</p>
+      </div>
+      <div class="feature-card glass">
+        <h3>⚔️ Action Combat</h3>
+        <p>Engage in fluid stamina-based combat. Dodge, parry, and cast powerful water magic against dynamic enemy AI.</p>
+      </div>
+      <div class="feature-card glass">
+        <h3>🤝 Seamless Co-op</h3>
+        <p>Built-in Steam integration. Host a game and share your secret Lobby Code for instant peer-to-peer multiplayer.</p>
+      </div>
+    </section>
+    
+    <footer>
+      <p>&copy; 2026 Fabled Kingdoms. Built with Godot 4.</p>
+    </footer>
+
+  </main>
+
   <script type="module" src="/src/main.ts"></script>
 </body>
 </html>
