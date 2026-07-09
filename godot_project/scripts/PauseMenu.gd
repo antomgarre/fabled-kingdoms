@@ -10,8 +10,15 @@ var overlay: ColorRect
 var panel: PanelContainer
 var title_label: Label
 var btn_continue: Button
+var btn_host: Button
+var btn_join: Button
 var btn_fullscreen: Button
 var btn_quit: Button
+
+# Lobby Info
+var lobby_container: HBoxContainer
+var lbl_lobby_code: Label
+var btn_copy_code: Button
 
 # Colors
 const COLOR_BG_DARK = Color(0.1, 0.1, 0.18, 1.0)
@@ -96,6 +103,32 @@ func _build_ui():
 	vbox.add_child(btn_continue)
 	btn_continue.pressed.connect(_on_continue)
 	
+	btn_host = _create_button("Hostear (Steam)")
+	vbox.add_child(btn_host)
+	btn_host.pressed.connect(_on_host)
+	
+	btn_join = _create_button("Unirse (Steam)")
+	vbox.add_child(btn_join)
+	btn_join.pressed.connect(_on_join)
+	
+	# --- Lobby Info ---
+	lobby_container = HBoxContainer.new()
+	lobby_container.alignment = BoxContainer.ALIGNMENT_CENTER
+	lobby_container.add_theme_constant_override("separation", 10)
+	vbox.add_child(lobby_container)
+	
+	lbl_lobby_code = Label.new()
+	lbl_lobby_code.add_theme_font_size_override("font_size", 16)
+	lbl_lobby_code.add_theme_color_override("font_color", COLOR_GOLD)
+	lobby_container.add_child(lbl_lobby_code)
+	
+	btn_copy_code = Button.new()
+	btn_copy_code.text = "Copiar"
+	btn_copy_code.add_theme_font_size_override("font_size", 16)
+	btn_copy_code.custom_minimum_size = Vector2(80, 30)
+	btn_copy_code.pressed.connect(_on_copy_code)
+	lobby_container.add_child(btn_copy_code)
+	
 	btn_fullscreen = _create_button("Pantalla Completa")
 	vbox.add_child(btn_fullscreen)
 	btn_fullscreen.pressed.connect(_on_fullscreen)
@@ -150,9 +183,9 @@ func _create_button(text: String) -> Button:
 	
 	return btn
 
-func _set_visible(show: bool):
-	overlay.visible = show
-	panel.visible = show
+func _set_visible(should_show: bool):
+	overlay.visible = should_show
+	panel.visible = should_show
 
 func toggle_pause():
 	if is_paused:
@@ -175,6 +208,21 @@ func _pause():
 	
 	# Show cursor
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+	
+	# Update Steam Lobby Info
+	lobby_container.hide()
+	var sm = get_node_or_null("/root/SteamManager")
+	if sm and sm.get("current_lobby_id") != null and sm.current_lobby_id > 0:
+		lbl_lobby_code.text = "Sala: " + sm.get_lobby_code()
+		btn_copy_code.text = "Copiar"
+		lobby_container.show()
+		
+		# Hide Host/Join buttons when in a game
+		btn_host.hide()
+		btn_join.hide()
+	else:
+		btn_host.show()
+		btn_join.show()
 
 func _unpause():
 	is_paused = false
@@ -196,6 +244,13 @@ func _unhandled_input(event):
 		var dialogue_ui = get_node_or_null("/root/Main/DialogueUI")
 		if dialogue_ui and dialogue_ui.is_open:
 			return
+			
+		# Check if WorldMap is open - don't steal ESC from it
+		var map_ui = get_node_or_null("/root/Main/WorldMap")
+		if not map_ui and get_tree().current_scene:
+			map_ui = get_tree().current_scene.get_node_or_null("WorldMap")
+		if map_ui and map_ui.get("is_map_open"):
+			return
 		
 		toggle_pause()
 		get_viewport().set_input_as_handled()
@@ -203,7 +258,21 @@ func _unhandled_input(event):
 # === Button callbacks ===
 
 func _on_continue():
-	_unpause()
+	toggle_pause()
+
+func _on_host():
+	var nm = get_node_or_null("/root/NetworkManager")
+	if nm and nm.has_method("host_game"):
+		nm.host_game()
+	toggle_pause()
+
+func _on_join():
+	var sm = get_node_or_null("/root/SteamManager")
+	if sm:
+		# Just open the overlay to let them accept an invite
+		if Engine.has_singleton("Steam"):
+			Steam.activateGameOverlay("Friends")
+	toggle_pause()
 
 func _on_fullscreen():
 	if DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN:
@@ -215,5 +284,10 @@ func _on_fullscreen():
 
 func _on_quit():
 	_unpause()
-	# Reload the current scene (effectively restarting)
-	get_tree().reload_current_scene()
+	get_tree().change_scene_to_file("res://scenes/MainMenu.tscn")
+
+func _on_copy_code():
+	var sm = get_node_or_null("/root/SteamManager")
+	if sm and sm.get("current_lobby_id") != null and sm.current_lobby_id > 0:
+		DisplayServer.clipboard_set(sm.get_lobby_code())
+		btn_copy_code.text = "¡Copiado!"

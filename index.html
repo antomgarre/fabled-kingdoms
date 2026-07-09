@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Fabled Kingdoms | Multiplayer Fantasy RPG</title>
+  <title data-i18n="page_title">Fabled Kingdoms | Multiplayer Fantasy RPG</title>
   
   <!-- Modern Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -25,47 +25,52 @@
     <header class="navbar">
       <div class="logo">Fabled Kingdoms</div>
       <nav>
-        <a href="#features">Features</a>
-        <a href="#multiplayer">Multiplayer</a>
-        <a href="#download" class="nav-cta">Download Now</a>
+        <a href="#features" data-i18n="nav_features">Features</a>
+        <a href="#multiplayer" data-i18n="nav_multiplayer">Multiplayer</a>
+        <a href="#download" class="nav-cta" data-i18n="nav_download">Download Now</a>
       </nav>
+      <!-- Language Switcher -->
+      <div class="lang-switcher">
+        <button id="btn-en" class="lang-btn">EN</button>
+        <button id="btn-es" class="lang-btn">ES</button>
+      </div>
     </header>
 
     <section class="hero">
       <div class="hero-content">
         <h1 class="title-glow">Fabled Kingdoms</h1>
-        <p class="subtitle">A Procedural Dark Fantasy RPG built with Godot 4.</p>
-        <p class="description">
+        <p class="subtitle" data-i18n="hero_subtitle">A Procedural Dark Fantasy RPG built with Godot 4.</p>
+        <p class="description" data-i18n="hero_description">
           Explore endless procedurally generated dark forests, battle fearsome enemies, and team up with friends anywhere in the world using native Steam P2P multiplayer. No servers required.
         </p>
         
         <div class="cta-container">
           <a href="downloads/Fabled_Kingdoms_Win64.zip" class="btn-primary" download>
-            <span class="btn-icon">⬇</span> Download for Windows
+            <span class="btn-icon">⬇</span> <span data-i18n="btn_download">Download for Windows</span>
           </a>
-          <span class="version-info">Version 0.1 Alpha • 45 MB</span>
+          <span class="version-info" data-i18n="version_info">Version 0.1 Alpha • 45 MB</span>
         </div>
       </div>
     </section>
 
     <section id="features" class="features-grid">
       <div class="feature-card glass">
-        <h3>🌍 Procedural Worlds</h3>
-        <p>Every playthrough generates a unique dark forest with dynamic terrain, rivers, and mysterious towns.</p>
+        <h3 data-i18n="feat_1_title">🌍 Procedural Worlds</h3>
+        <p data-i18n="feat_1_desc">Every playthrough generates a unique dark forest with dynamic terrain, rivers, and mysterious towns.</p>
       </div>
       <div class="feature-card glass">
-        <h3>⚔️ Action Combat</h3>
-        <p>Engage in fluid stamina-based combat. Dodge, parry, and cast powerful water magic against dynamic enemy AI.</p>
+        <h3 data-i18n="feat_2_title">⚔️ Action Combat</h3>
+        <p data-i18n="feat_2_desc">Engage in fluid stamina-based combat. Dodge, parry, and cast powerful water magic against dynamic enemy AI.</p>
       </div>
       <div class="feature-card glass">
-        <h3>🤝 Seamless Co-op</h3>
-        <p>Built-in Steam integration. Host a game and share your secret Lobby Code for instant peer-to-peer multiplayer.</p>
+        <h3 data-i18n="feat_3_title">🤝 Seamless Co-op</h3>
+        <p data-i18n="feat_3_desc">Built-in Steam integration. Host a game and share your secret Lobby Code for instant peer-to-peer multiplayer.</p>
       </div>
     </section>
     
     <footer>
-      <p>&copy; 2026 Fabled Kingdoms. Built with Godot 4.</p>
-      <p class="author-credits">Created by <a href="https://espiadegithub.es/autor" target="_blank" rel="noopener noreferrer">Antonio Martin Garre</a></p>
+      <p><span data-i18n="footer_copy">&copy; 2026 Fabled Kingdoms. Built with Godot 4.</span></p>
+      <p class="author-credits"><span data-i18n="footer_created">Created by</span> <a href="https://espiadegithub.es/autor" target="_blank" rel="noopener noreferrer">Antonio Martin Garre</a></p>
     </footer>
 
   </main>
