@@ -5,9 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "node download-lfs.js",
+    "build": "vite build",
     "preview": "vite preview",
-    "start": "serve web -p ${PORT:-3000}",
+    "start": "serve dist -p ${PORT:-3000}",
     "test:e2e": "vitest run tests/e2e --environment jsdom",
     "test:ai": "tsx test-gamemaster.ts"
   },
