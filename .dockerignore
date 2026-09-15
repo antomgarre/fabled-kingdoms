@@ -1,0 +1,31 @@
+# Dependencies & caches
+node_modules
+dist
+.cache
+*.log
+
+# Git & Agent metadata
+.git
+.agents
+blackboard
+
+# Game engine, builds & large assets
+godot_project
+windows_build_temp
+generated_worlds
+downloads
+**/downloads
+public/downloads
+web
+
+# Binary file types
+*.exe
+*.zip
+*.7z
+*.pck
+*.wasm
+*.dll
+*.so
+*.dylib
+*.pdb
+*.apk
